@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "457868503448",
+    "firebase_url": "https://appsproject-jz00-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "appsproject-jz00",
+    "storage_bucket": "appsproject-jz00.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:457868503448:android:481a36d0ff0f7d5e1023ed",
+        "android_client_info": {
+          "package_name": "com.techjet.chatnova"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "457868503448-8dmeguedls8df8co5qae8r5qn4h8qcq2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3lejtAp8MblUq0au2vJ9SkYVsb2gZ4NA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "457868503448-8dmeguedls8df8co5qae8r5qn4h8qcq2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
