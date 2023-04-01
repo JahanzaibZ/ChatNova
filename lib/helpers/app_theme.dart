@@ -12,6 +12,20 @@ ThemeData lightTheme() {
         side: const BorderSide(color: Colors.black26),
       ),
     ),
+    appBarTheme: const AppBarTheme(
+      color: Colors.transparent,
+      shadowColor: Colors.transparent,
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      hintStyle: TextStyle(
+        color: Colors.black.withAlpha(150),
+      ),
+      labelStyle: TextStyle(color: Colors.black.withAlpha(150)),
+      floatingLabelStyle: TextStyle(color: lightColorScheme().primary),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+    ),
   );
 }
 
@@ -21,11 +35,26 @@ ThemeData darkTheme() {
     scaffoldBackgroundColor: const Color.fromARGB(255, 27, 27, 39),
     dividerTheme: const DividerThemeData(color: Colors.white30, thickness: 1),
     textTheme: GoogleFonts.ubuntuTextTheme().apply(
-        bodyColor: Colors.white70,
-        displayColor: Colors.white70), // Ubuntu and Cabin Font finalized
+      bodyColor: Colors.white.withAlpha(220),
+      displayColor: Colors.white.withAlpha(220),
+    ), // Ubuntu and Cabin Font finalized
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         side: const BorderSide(color: Colors.white30),
+      ),
+    ),
+    appBarTheme: const AppBarTheme(
+      color: Colors.transparent,
+      shadowColor: Colors.transparent,
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      hintStyle: TextStyle(
+        color: Colors.white.withAlpha(150),
+      ),
+      labelStyle: TextStyle(color: Colors.white.withAlpha(150)),
+      floatingLabelStyle: TextStyle(color: darkColorScheme().primary),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20),
       ),
     ),
   );

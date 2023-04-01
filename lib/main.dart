@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import './screens/auth_type_screen.dart';
+import './screens/auth_screen.dart';
+import './screens/privacy_policy_screen.dart';
 import './helpers/app_theme.dart';
 
 void main() {
@@ -15,7 +17,12 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       theme: lightTheme(),
       darkTheme: darkTheme(),
-      home: AuthTypeScreen(),
+      home: const AuthTypeScreen(),
+      routes: {
+        AuthTypeScreen.routeName: (context) => const AuthTypeScreen(),
+        AuthScreen.routeName: (context) => const AuthScreen(),
+        PrivacyPolicyScreen.routeName: (context) => const PrivacyPolicyScreen(),
+      },
     );
   }
 }

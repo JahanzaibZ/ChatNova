@@ -1,9 +1,21 @@
+import 'package:chatnova/screens/auth_screen.dart';
 import 'package:flutter/material.dart';
 
-class AuthTypeScreen extends StatelessWidget {
-  final formKey = GlobalKey<FormState>();
+import './privacy_policy_screen.dart';
+import '../helpers/auth_type.dart';
 
-  AuthTypeScreen({super.key});
+class AuthTypeScreen extends StatelessWidget {
+  static const routeName = '/auth-type-screen';
+
+  const AuthTypeScreen({super.key});
+
+  void navigateToScreen(BuildContext context, AuthType authType) {
+    Navigator.pushNamed(
+      context,
+      AuthScreen.routeName,
+      arguments: authType,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,11 +82,12 @@ class AuthTypeScreen extends StatelessWidget {
                   OutlinedButton(
                     style: OutlinedButton.styleFrom(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
+                          borderRadius: BorderRadius.circular(20),
                         ),
                         fixedSize: Size(
                             deviceSize.width * .8, deviceSize.height * .07)),
-                    onPressed: () {},
+                    onPressed: () => navigateToScreen(
+                        context, AuthType.signUpWithEmailAddress),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: const [
@@ -89,12 +102,13 @@ class AuthTypeScreen extends StatelessWidget {
                   OutlinedButton(
                     style: OutlinedButton.styleFrom(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                       fixedSize:
                           Size(deviceSize.width * .8, deviceSize.height * .07),
                     ),
-                    onPressed: () {},
+                    onPressed: () => navigateToScreen(
+                        context, AuthType.signUpWithPhoneNumber),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: const [
@@ -128,20 +142,21 @@ class AuthTypeScreen extends StatelessWidget {
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
+                          borderRadius: BorderRadius.circular(20),
                         ),
                         fixedSize: Size(
                             deviceSize.width * .8, deviceSize.height * .07)),
-                    onPressed: () {},
+                    onPressed: () => navigateToScreen(context, AuthType.signIn),
                     child: const Text('Sign in'),
                   ),
                   SizedBox(
                     height: deviceSize.height * .025,
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () => Navigator.pushNamed(
+                        context, PrivacyPolicyScreen.routeName),
                     child: const Text(
-                      ' Terms & Privacy Policy',
+                      'Privacy Policy',
                       style: TextStyle(
                         fontSize: 12,
                       ),
