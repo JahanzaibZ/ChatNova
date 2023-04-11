@@ -1,7 +1,7 @@
-import 'package:chatnova/screens/auth_screen.dart';
 import 'package:flutter/material.dart';
 
 import './privacy_policy_screen.dart';
+import './auth_screen.dart';
 import '../helpers/auth_type.dart';
 
 class AuthTypeScreen extends StatelessWidget {
@@ -25,7 +25,7 @@ class AuthTypeScreen extends StatelessWidget {
         child: Column(
           children: [
             SizedBox(
-              height: deviceSize.height * .4,
+              height: deviceSize.height * .5,
               width: deviceSize.width,
               child: Stack(children: [
                 Container(
@@ -38,7 +38,7 @@ class AuthTypeScreen extends StatelessWidget {
                           deviceSize.width * .87, deviceSize.height * .2),
                     ),
                   ),
-                  height: deviceSize.height * .4,
+                  height: deviceSize.height * .5,
                   width: deviceSize.width,
                 ),
                 Column(
@@ -74,31 +74,11 @@ class AuthTypeScreen extends StatelessWidget {
               ]),
             ),
             SizedBox(
-              height: deviceSize.height * .6,
+              height: deviceSize.height * .5,
               width: deviceSize.width,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        fixedSize: Size(
-                            deviceSize.width * .8, deviceSize.height * .07)),
-                    onPressed: () => navigateToScreen(
-                        context, AuthType.signUpWithEmailAddress),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: const [
-                        Icon(Icons.email),
-                        Text('Sign up with email address'),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: deviceSize.height * .03,
-                  ),
                   OutlinedButton(
                     style: OutlinedButton.styleFrom(
                       shape: RoundedRectangleBorder(
@@ -108,12 +88,12 @@ class AuthTypeScreen extends StatelessWidget {
                           Size(deviceSize.width * .8, deviceSize.height * .07),
                     ),
                     onPressed: () => navigateToScreen(
-                        context, AuthType.signUpWithPhoneNumber),
+                        context, AuthType.signUpWithEmailAddress),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: const [
-                        Icon(Icons.phone),
-                        Text('Sign up with phone number'),
+                        Icon(Icons.email),
+                        Text('Continue with email address'),
                       ],
                     ),
                   ),
@@ -146,8 +126,9 @@ class AuthTypeScreen extends StatelessWidget {
                         ),
                         fixedSize: Size(
                             deviceSize.width * .8, deviceSize.height * .07)),
-                    onPressed: () => navigateToScreen(context, AuthType.signIn),
-                    child: const Text('Sign in'),
+                    onPressed: () => navigateToScreen(
+                        context, AuthType.continueWithPhoneNumber),
+                    child: const Text('Continue with Phone Number'),
                   ),
                   SizedBox(
                     height: deviceSize.height * .025,

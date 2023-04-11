@@ -1,5 +1,5 @@
 enum AuthType {
-  signUpWithPhoneNumber,
+  signInWithEmailAddress,
   signUpWithEmailAddress,
-  signIn,
+  continueWithPhoneNumber,
 }

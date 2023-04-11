@@ -2,20 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 ThemeData lightTheme() {
-  return ThemeData().copyWith(
+  return ThemeData(
     colorScheme: lightColorScheme(),
     scaffoldBackgroundColor: const Color.fromARGB(255, 235, 235, 230),
     dividerTheme: const DividerThemeData(color: Colors.black26, thickness: 1),
     textTheme: GoogleFonts.ubuntuTextTheme(), // Ubuntu and Cabin Font finalized
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        side: const BorderSide(color: Colors.black26),
+        side: BorderSide(
+          color: lightColorScheme().primary,
+          // color: Colors.black26,
+        ),
       ),
     ),
     appBarTheme: const AppBarTheme(
-      color: Colors.transparent,
-      shadowColor: Colors.transparent,
-    ),
+        backgroundColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        foregroundColor: Colors.black),
     inputDecorationTheme: InputDecorationTheme(
       hintStyle: TextStyle(
         color: Colors.black.withAlpha(150),
@@ -26,11 +29,17 @@ ThemeData lightTheme() {
         borderRadius: BorderRadius.circular(20),
       ),
     ),
+    dialogTheme: DialogTheme(
+      backgroundColor: const Color.fromARGB(255, 235, 235, 230),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(25),
+      ),
+    ),
   );
 }
 
 ThemeData darkTheme() {
-  return ThemeData().copyWith(
+  return ThemeData(
     colorScheme: darkColorScheme(),
     scaffoldBackgroundColor: const Color.fromARGB(255, 27, 27, 39),
     dividerTheme: const DividerThemeData(color: Colors.white30, thickness: 1),
@@ -40,12 +49,16 @@ ThemeData darkTheme() {
     ), // Ubuntu and Cabin Font finalized
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        side: const BorderSide(color: Colors.white30),
+        side: BorderSide(
+          color: darkColorScheme().primary,
+          // color: Colors.white30,
+        ),
       ),
     ),
     appBarTheme: const AppBarTheme(
-      color: Colors.transparent,
+      backgroundColor: Colors.transparent,
       shadowColor: Colors.transparent,
+      foregroundColor: Colors.white,
     ),
     inputDecorationTheme: InputDecorationTheme(
       hintStyle: TextStyle(
@@ -57,12 +70,18 @@ ThemeData darkTheme() {
         borderRadius: BorderRadius.circular(20),
       ),
     ),
+    dialogTheme: DialogTheme(
+      backgroundColor: const Color.fromARGB(255, 27, 27, 39),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(25),
+      ),
+    ),
   );
 }
 
 ColorScheme lightColorScheme() {
   return const ColorScheme(
-    brightness: Brightness.dark,
+    brightness: Brightness.light,
     primary: Color.fromARGB(255, 95, 90, 230),
     onPrimary: Colors.white,
     secondary: Colors.orange,

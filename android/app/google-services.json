@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "457868503448-kkvhbgee0ultlogfsv3q3gnhfqn7f14t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.techjet.chatnova",
+            "certificate_hash": "ce93d5f85cd667004dea32849af0b246530719b3"
+          }
+        },
+        {
           "client_id": "457868503448-8dmeguedls8df8co5qae8r5qn4h8qcq2.apps.googleusercontent.com",
           "client_type": 3
         }
