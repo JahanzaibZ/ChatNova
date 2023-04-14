@@ -1,8 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import './opt_screen.dart';
+import '../providers/auth_provider.dart';
 import '../helpers/auth_type.dart';
+import '../widgets/show_dialog.dart';
 
 class AuthScreen extends StatefulWidget {
   static const routeName = '/auth-screen';
@@ -13,45 +19,66 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  final firebaseAuth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
   final _passwordTextFieldFocusNode = FocusNode();
 
-  final Map<String, String?> _userCredentials = {
-    'emailOrPhone': null,
-    'password': null,
-  };
   var _authType = AuthType.continueWithPhoneNumber;
   var _passwordVisibility = false;
   var _isInit = true;
   var _isLoading = false;
 
-  void submitForm() async {
-    var isValid = _formKey.currentState!.validate();
-    if (isValid) {
-      setState(() {
-        _isLoading = true;
-      });
-      _formKey.currentState!.save();
-      // TO-DO: Implement Logic...
+  Future<void> _submitForm() async {
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      var isValid = _formKey.currentState!.validate();
+      if (isValid) {
+        _formKey.currentState!.save();
+        FocusScope.of(context).unfocus();
+        setState(() {
+          _isLoading = true;
+        });
+        showCustomDialog(context,
+            content: 'Loading...', showActionButton: false);
+        if (_authType == AuthType.continueWithPhoneNumber) {
+          await authProvider.sendOTP();
+          setState(() {
+            _isLoading = false;
+          });
+          if (mounted) {
+            Navigator.of(context).popAndPushNamed(
+              OtpScreen.routeName,
+            );
+          }
+        } else {
+          await authProvider.authenticateWithEmailAndPassword(_authType);
+          if (mounted) {
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          }
+        }
+      }
+    } on FirebaseAuthException catch (error) {
+      Navigator.of(context).pop();
+      await showCustomDialog(
+        context,
+        title: 'Error Occured!',
+        content: '${error.message}\nError code: ${error.code}',
+        showActionButton: true,
+      );
       setState(() {
         _isLoading = false;
       });
+    } catch (error) {
+      setState(() {
+        _isLoading = false;
+      });
+      Navigator.of(context).pop();
+      showCustomDialog(
+        context,
+        title: 'Unknown Error!',
+        content: error.toString(),
+        showActionButton: true,
+      );
     }
-  }
-
-  Future<bool> sendOTP({String? phoneNumber}) async {
-    var attemptSuccesful = true;
-    firebaseAuth.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
-      verificationCompleted: (phoneAuthCredential) {},
-      verificationFailed: (error) {
-        throw error;
-      },
-      codeSent: (verificationId, forceResendingToken) {},
-      codeAutoRetrievalTimeout: (verificationId) {},
-    );
-    return attemptSuccesful;
   }
 
   @override
@@ -65,6 +92,7 @@ class _AuthScreenState extends State<AuthScreen> {
         kToolbarHeight -
         mediaQuery.padding.top -
         mediaQuery.padding.bottom;
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(),
       body: Container(
@@ -133,14 +161,13 @@ class _AuthScreenState extends State<AuthScreen> {
                           onFieldSubmitted: (_) => FocusScope.of(context)
                               .requestFocus(_passwordTextFieldFocusNode),
                           onSaved: (newValue) {
-                            _userCredentials['emailOrPhone'] = newValue;
+                            authProvider.setUserCredentials = {
+                              'email': newValue
+                            };
                           },
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return _authType ==
-                                      AuthType.signUpWithEmailAddress
-                                  ? 'Email field cannot be empty'
-                                  : 'Email/Phone Number field cannot be empty';
+                              return 'Email field cannot be empty';
                             }
                             return null;
                           },
@@ -148,14 +175,16 @@ class _AuthScreenState extends State<AuthScreen> {
                       if (_authType == AuthType.continueWithPhoneNumber)
                         IntlPhoneField(
                           showCountryFlag: false,
+                          initialCountryCode: 'PK',
                           flagsButtonPadding: const EdgeInsets.only(left: 10),
                           decoration: const InputDecoration(
                             labelText: 'Phone Number',
                             // hintText: 'Enter your phone number',
                           ),
                           onSaved: (newValue) {
-                            _userCredentials['emailOrPhone'] =
-                                newValue?.completeNumber;
+                            authProvider.setUserCredentials = {
+                              'phone': newValue?.completeNumber
+                            };
                           },
                         ),
                       if (_authType != AuthType.continueWithPhoneNumber)
@@ -187,8 +216,8 @@ class _AuthScreenState extends State<AuthScreen> {
                                   : Icons.visibility_off),
                             ),
                           ),
-                          onSaved: (newValue) =>
-                              _userCredentials['password'] = newValue,
+                          onSaved: (newValue) => authProvider
+                              .setUserCredentials = {'password': newValue},
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Password field cannot be empty';
@@ -230,20 +259,19 @@ class _AuthScreenState extends State<AuthScreen> {
                         children: [
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                                minimumSize: Size(mediaQuery.size.width * .4,
-                                    mediaQuery.size.height * .07),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20))),
-                            onPressed: submitForm,
-                            child: _isLoading
-                                ? const CircularProgressIndicator()
-                                : Text(_authType ==
-                                        AuthType.continueWithPhoneNumber
-                                    ? 'Continue'
-                                    : _authType ==
-                                            AuthType.signInWithEmailAddress
-                                        ? 'Sign In'
-                                        : 'Sign Up'),
+                              minimumSize: Size(mediaQuery.size.width * .4,
+                                  mediaQuery.size.height * .07),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            onPressed: _isLoading ? null : _submitForm,
+                            child: Text(_authType ==
+                                    AuthType.continueWithPhoneNumber
+                                ? 'Continue'
+                                : _authType == AuthType.signInWithEmailAddress
+                                    ? 'Sign In'
+                                    : 'Sign Up'),
                           )
                         ],
                       ),

@@ -1,42 +1,33 @@
 {
   "project_info": {
-    "project_number": "457868503448",
-    "firebase_url": "https://appsproject-jz00-default-rtdb.asia-southeast1.firebasedatabase.app",
-    "project_id": "appsproject-jz00",
-    "storage_bucket": "appsproject-jz00.appspot.com"
+    "project_number": "1039299081041",
+    "project_id": "myappsproject-jz00",
+    "storage_bucket": "myappsproject-jz00.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:457868503448:android:481a36d0ff0f7d5e1023ed",
+        "mobilesdk_app_id": "1:1039299081041:android:65a40d79b4e7bdce645970",
         "android_client_info": {
           "package_name": "com.techjet.chatnova"
         }
       },
       "oauth_client": [
         {
-          "client_id": "457868503448-kkvhbgee0ultlogfsv3q3gnhfqn7f14t.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.techjet.chatnova",
-            "certificate_hash": "ce93d5f85cd667004dea32849af0b246530719b3"
-          }
-        },
-        {
-          "client_id": "457868503448-8dmeguedls8df8co5qae8r5qn4h8qcq2.apps.googleusercontent.com",
+          "client_id": "1039299081041-0j2m6do8qeime6585vr8vgfv4h6rfgcs.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyC3lejtAp8MblUq0au2vJ9SkYVsb2gZ4NA"
+          "current_key": "AIzaSyA9fjPuWO2gVcmXPcuyzmAgsr7uVfJaN90"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "457868503448-8dmeguedls8df8co5qae8r5qn4h8qcq2.apps.googleusercontent.com",
+              "client_id": "1039299081041-0j2m6do8qeime6585vr8vgfv4h6rfgcs.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
