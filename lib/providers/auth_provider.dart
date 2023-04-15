@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../helpers/auth_type.dart';
+import '../helpers/auth_exception.dart';
 
 class AuthProvider with ChangeNotifier {
   final _authInstance = FirebaseAuth.instance;
@@ -60,55 +61,123 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> sendOTP([int? resendToken]) async {
-    var completer = Completer<void>();
-    // Completer<void>() used to wait for callback functions to complete as FirebaseAuth.instance.verifyPhoneNumber() does not wait for the request to be verified but only waits for request to be sent, which is its normal behaviour.
-    await _authInstance.verifyPhoneNumber(
-      phoneNumber: _userCredentials['phone'],
-      verificationCompleted: (phoneAuthCredential) async {
-        // Commented until a solution is found
+    try {
+      var completer = Completer<void>();
+      // Completer<void>() used to wait for callback functions to complete as FirebaseAuth.instance.verifyPhoneNumber() does not wait for the request to be verified but only waits for request to be sent, which is its normal behaviour.
+      await _authInstance.verifyPhoneNumber(
+        phoneNumber: _userCredentials['phone'],
+        verificationCompleted: (phoneAuthCredential) async {
+          // Commented until a solution is found
 
-        // debugPrint('Executed Verification Completed Callback!');
-        // _otpCredentials['verificationComplete'] = true;
-        // notifyListeners();
-        // // Show Dialog here
-        // await FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
-        // _otpCredentials['isAuthenticated'] = true;
-        // notifyListeners();
-        // // Pop screens here
-        // completer.complete();
-      },
-      verificationFailed: (error) {
-        debugPrint('Executed Verification Failed Callback!');
-        completer.completeError(error);
-      },
-      codeSent: (verificationId, forceResendingToken) {
-        debugPrint('Executed Code Sent Callback!');
-        _otpCredentials['verificationId'] = verificationId;
-        _otpCredentials['resendToken'] = forceResendingToken;
-        completer.complete();
-      },
-      codeAutoRetrievalTimeout: (verificationId) {
-        debugPrint('Executed codeAutoRetrievalTimeout Callback!');
-      },
-      forceResendingToken: resendToken,
-    );
-    _otpCredentials['verificationComplete'] = false;
-    _otpCredentials['isAuthenticated'] = false;
-    return completer.future;
+          // debugPrint('Executed Verification Completed Callback!');
+          // _otpCredentials['verificationComplete'] = true;
+          // notifyListeners();
+          // // Show Dialog here
+          // await FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
+          // _otpCredentials['isAuthenticated'] = true;
+          // notifyListeners();
+          // // Pop screens here
+          // completer.complete();
+        },
+        verificationFailed: (error) {
+          debugPrint('Executed Verification Failed Callback!');
+          completer.completeError(error);
+        },
+        codeSent: (verificationId, forceResendingToken) {
+          debugPrint('Executed Code Sent Callback!');
+          _otpCredentials['verificationId'] = verificationId;
+          _otpCredentials['resendToken'] = forceResendingToken;
+          completer.complete();
+        },
+        codeAutoRetrievalTimeout: (verificationId) {
+          debugPrint('Executed codeAutoRetrievalTimeout Callback!');
+        },
+        forceResendingToken: resendToken,
+      );
+      _otpCredentials['verificationComplete'] = false;
+      _otpCredentials['isAuthenticated'] = false;
+      return completer.future;
+    } on FirebaseAuthException catch (error) {
+      throw AuthException('${error.message}\nError code: ${error.code}');
+    } catch (error) {
+      rethrow;
+    }
   }
 
   Future<void> authenticateWithEmailAndPassword(AuthType authType) async {
-    if (authType == AuthType.signUpWithEmailAddress) {
-      await _authInstance.createUserWithEmailAndPassword(
-        email: _userCredentials['email']!,
-        password: _userCredentials['password']!,
-      );
-    } else {
-      await _authInstance.signInWithEmailAndPassword(
-        email: _userCredentials['email']!,
-        password: _userCredentials['password']!,
-      );
+    try {
+      if (authType == AuthType.signUpWithEmailAddress) {
+        await _authInstance.createUserWithEmailAndPassword(
+          email: _userCredentials['email']!,
+          password: _userCredentials['password']!,
+        );
+      } else {
+        await _authInstance.signInWithEmailAndPassword(
+          email: _userCredentials['email']!,
+          password: _userCredentials['password']!,
+        );
+      }
+      return;
+    } on FirebaseAuthException catch (error) {
+      String message;
+      if (error.code == 'email-already-in-use') {
+        message = 'An account with this email address already exist!';
+      } else if (error.code == 'invalid-email') {
+        message = 'Invalid email address or format, please try again!';
+      } else if (error.code == 'operation-not-allowed') {
+        message = 'Operation now allowed!\nPlease contact customer support.';
+      } else if (error.code == 'weak-password') {
+        message =
+            'Week password! Please enter a strong password and try again.';
+      } else if (error.code == 'user-disabled') {
+        message = 'Account disabled! Please contact customer support.';
+      } else if (error.code == 'user-not-found') {
+        message = 'Account with the specified email address not found!';
+      } else if (error.code == 'wrong-password') {
+        message =
+            'Incorrect password! Please enter correct password and try again.';
+      } else {
+        message =
+            'Unexpected Error! Code: ${error.code}, message: ${error.message}\n\n Please contact customer support.';
+      }
+      throw AuthException(message);
+    } catch (error) {
+      rethrow;
     }
-    return;
+  }
+
+  Future<void> authenticateWithCredentials(String smsCode) async {
+    try {
+      PhoneAuthCredential phoneAuthCredential = PhoneAuthProvider.credential(
+          verificationId: _otpCredentials['verificationId'] as String,
+          smsCode: smsCode);
+      await FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
+    } on FirebaseAuthException catch (error) {
+      String message;
+      if (error.code == 'account-exists-with-different-credential') {
+        message = 'Account already exists with different credential!';
+      } else if (error.code == 'invalid-credential') {
+        message = 'Credentials are invalid.';
+      } else if (error.code == 'operation-not-allowed') {
+        message = 'Operation now allowed!';
+      } else if (error.code == 'user-disabled') {
+        message = 'Account is disbaled.';
+      } else if (error.code == 'user-not-found') {
+        message = 'User not found.';
+      } else if (error.code == 'wrong-password') {
+        message = 'Wrong Password.';
+      } else if (error.code == 'invalid-verification-code') {
+        message =
+            'Incorrect verfication code, please enter the correct code and try again.';
+      } else if (error.code == 'invalid-verification-id') {
+        message = 'Invalid verificatio id.';
+      } else {
+        message =
+            'Unexpected Error! Code: ${error.code}, message: ${error.message}\n\n Please contact customer support.';
+      }
+      throw AuthException(message);
+    } catch (error) {
+      rethrow;
+    }
   }
 }

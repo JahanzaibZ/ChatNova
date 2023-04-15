@@ -1,7 +1,7 @@
+import 'package:chatnova/helpers/auth_exception.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import '../providers/auth_provider.dart';
 import '../widgets/resend_otp_button.dart';
@@ -33,11 +33,7 @@ class _OtpScreenState extends State<OtpScreen> {
         });
         showCustomDialog(context,
             content: 'Loading...', showActionButton: false);
-        PhoneAuthCredential phoneAuthCredential = PhoneAuthProvider.credential(
-            verificationId:
-                authProvider.otpCredentials['verificationId'] as String,
-            smsCode: _smsCode);
-        await FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
+        await authProvider.authenticateWithCredentials(_smsCode);
         setState(() {
           _isAuthenticated = true;
         });
@@ -47,30 +43,12 @@ class _OtpScreenState extends State<OtpScreen> {
           );
         }
       }
-    } on FirebaseAuthException catch (error) {
-      var message = 'Unknown error occured, please try again!';
-      if (error.code == 'account-exists-with-different-credential') {
-      } else if (error.code == 'invalid-credential') {
-        message = 'Credentials are invalid.';
-      } else if (error.code == 'operation-not-allowed') {
-        message = 'Operation now allowed!';
-      } else if (error.code == 'user-disabled') {
-        message = 'Account is disbaled.';
-      } else if (error.code == 'user-not-found') {
-        message = 'User not found.';
-      } else if (error.code == 'wrong-password') {
-        message = 'Wrong Password.';
-      } else if (error.code == 'invalid-verification-code') {
-        message =
-            'Incorrect verfication code, please enter the correct code and try again.';
-      } else if (error.code == 'invalid-verification-id') {
-        message = 'Invalid verificatio id.';
-      }
+    } on AuthException catch (error) {
       Navigator.of(context).pop();
       showCustomDialog(
         context,
         title: 'Error occured!',
-        content: message,
+        content: error.toString(),
         showActionButton: true,
       );
       setState(() {

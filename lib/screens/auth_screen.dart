@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import './opt_screen.dart';
+import '../widgets/show_dialog.dart';
 import '../providers/auth_provider.dart';
 import '../helpers/auth_type.dart';
-import '../widgets/show_dialog.dart';
+import '../helpers/auth_exception.dart';
 
 class AuthScreen extends StatefulWidget {
   static const routeName = '/auth-screen';
@@ -56,12 +56,12 @@ class _AuthScreenState extends State<AuthScreen> {
           }
         }
       }
-    } on FirebaseAuthException catch (error) {
+    } on AuthException catch (error) {
       Navigator.of(context).pop();
       await showCustomDialog(
         context,
         title: 'Error Occured!',
-        content: '${error.message}\nError code: ${error.code}',
+        content: error.toString(),
         showActionButton: true,
       );
       setState(() {
