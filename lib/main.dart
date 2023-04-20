@@ -9,6 +9,7 @@ import './screens/main_screen.dart';
 import './screens/auth_type_screen.dart';
 import './screens/auth_screen.dart';
 import './screens/opt_screen.dart';
+import './screens/profile_setup_screen.dart';
 import './screens/privacy_policy_screen.dart';
 import './helpers/app_theme.dart';
 import './providers/auth_provider.dart';
@@ -36,7 +37,24 @@ class MainApp extends StatelessWidget {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const SplashScreen();
             } else if (snapshot.hasData) {
-              return const MainScreen();
+              return FutureBuilder(
+                future: Provider.of<AuthProvider>(context, listen: false)
+                    .prefsIsNewUser(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    debugPrint('executed Futurebuilder waiting...');
+                    return const SplashScreen();
+                  } else if (snapshot.hasData) {
+                    if (snapshot.data == true) {
+                      return const ProfileSetupScreen();
+                    } else {
+                      return const MainScreen();
+                    }
+                  } else {
+                    return const MainScreen();
+                  }
+                },
+              );
             } else {
               return const AuthTypeScreen();
             }

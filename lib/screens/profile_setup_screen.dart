@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class MainScreen extends StatelessWidget {
-  static const routeName = '/main-screen';
+class ProfileSetupScreen extends StatelessWidget {
+  static const routeName = 'profile-setup';
 
-  const MainScreen({super.key});
+  const ProfileSetupScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class MainScreen extends StatelessWidget {
         ],
       ),
       body: const Center(
-        child: Text('MainScreen'),
+        child: Text('Profile Setup Screen'),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/auth_type.dart';
 import '../helpers/auth_exception.dart';
@@ -60,6 +61,27 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<dynamic> prefsIsNewUser([bool? setKey]) async {
+    var prefs = await SharedPreferences.getInstance();
+    if (setKey != null && setKey == true) {
+      prefs.setBool('isNewUser', true);
+      notifyListeners();
+      return;
+    } else if (setKey != null && setKey == false) {
+      prefs.setBool('isNewUser', false);
+      notifyListeners();
+      return;
+    } else {
+      if (prefs.containsKey('isNewUser')) {
+        if (prefs.getBool('isNewUser') == false) {
+          return false;
+        }
+        return true;
+      }
+      return true;
+    }
+  }
+
   Future<void> sendOTP([int? resendToken]) async {
     try {
       var completer = Completer<void>();
@@ -111,11 +133,15 @@ class AuthProvider with ChangeNotifier {
           email: _userCredentials['email']!,
           password: _userCredentials['password']!,
         );
+
+        await prefsIsNewUser(true);
       } else {
         await _authInstance.signInWithEmailAndPassword(
           email: _userCredentials['email']!,
           password: _userCredentials['password']!,
         );
+
+        await prefsIsNewUser(false);
       }
       return;
     } on FirebaseAuthException catch (error) {
@@ -152,6 +178,7 @@ class AuthProvider with ChangeNotifier {
           verificationId: _otpCredentials['verificationId'] as String,
           smsCode: smsCode);
       await FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
+      await prefsIsNewUser(true);
     } on FirebaseAuthException catch (error) {
       String message;
       if (error.code == 'account-exists-with-different-credential') {
