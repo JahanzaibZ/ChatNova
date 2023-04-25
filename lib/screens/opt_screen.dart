@@ -1,4 +1,3 @@
-import 'package:chatnova/helpers/auth_exception.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/resend_otp_button.dart';
 import '../widgets/show_dialog.dart';
+import '../helpers/auth_exception.dart';
 
 class OtpScreen extends StatefulWidget {
   static const routeName = '/otp-screen';

@@ -13,6 +13,7 @@ import './screens/profile_setup_screen.dart';
 import './screens/privacy_policy_screen.dart';
 import './helpers/app_theme.dart';
 import './providers/auth_provider.dart';
+import './providers/user_profile_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,40 +27,47 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => AuthProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => AuthProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => UserProfileProvider(),
+        ),
+      ],
       child: MaterialApp(
         theme: lightTheme(),
         darkTheme: darkTheme(),
-        home: StreamBuilder(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SplashScreen();
-            } else if (snapshot.hasData) {
-              return FutureBuilder(
-                future: Provider.of<AuthProvider>(context, listen: false)
-                    .prefsIsNewUser(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    debugPrint('executed Futurebuilder waiting...');
-                    return const SplashScreen();
-                  } else if (snapshot.hasData) {
-                    if (snapshot.data == true) {
-                      return const ProfileSetupScreen();
-                    } else {
-                      return const MainScreen();
-                    }
-                  } else {
-                    return const MainScreen();
-                  }
-                },
-              );
-            } else {
-              return const AuthTypeScreen();
-            }
-          },
-        ),
+        home: const MainScreen(),
+        // StreamBuilder(
+        //   stream: FirebaseAuth.instance.authStateChanges(),
+        //   builder: (context, snapshot) {
+        //     if (snapshot.connectionState == ConnectionState.waiting) {
+        //       return const SplashScreen();
+        //     } else if (snapshot.hasData) {
+        //       return FutureBuilder(
+        //         future: Provider.of<AuthProvider>(context).prefsIsNewUser(),
+        //         builder: (context, snapshot) {
+        //           if (snapshot.connectionState == ConnectionState.waiting) {
+        //             debugPrint('executed Futurebuilder waiting...');
+        //             return const SplashScreen();
+        //           } else if (snapshot.hasData) {
+        //             if (snapshot.data == true) {
+        //               return const ProfileSetupScreen();
+        //             } else {
+        //               return const MainScreen();
+        //             }
+        //           } else {
+        //             return const MainScreen();
+        //           }
+        //         },
+        //       );
+        //     } else {
+        //       return const AuthTypeScreen();
+        //     }
+        //   },
+        // ),
         routes: {
           SplashScreen.routeName: (context) => const SplashScreen(),
           MainScreen.routeName: (context) => const MainScreen(),

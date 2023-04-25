@@ -16,8 +16,7 @@ class AuthProvider with ChangeNotifier {
   };
 
   Map<String, Object?> get userCredentials {
-    var userCreds = _userCredentials;
-    return userCreds;
+    return {..._userCredentials};
   }
 
   set setUserCredentials(Map<String, String?> userCreds) {
