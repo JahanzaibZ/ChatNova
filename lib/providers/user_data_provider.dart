@@ -5,18 +5,19 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class UserProfileProvider with ChangeNotifier {
-  final Map<String, String?> _userInfo = {
+class UserDataProvider with ChangeNotifier {
+  final Map<String, dynamic> _userInfo = {
     'fullName': null,
     'profileImageURL': null,
     'dateOfBirth': null,
   };
+  final List<String> _userFriends = [];
 
-  Map<String, String?> get userInfo {
+  Map<String, dynamic> get userInfo {
     return {..._userInfo};
   }
 
-  set setUserInfo(Map<String, String?> userInfo) {
+  set setUserInfo(Map<String, dynamic> userInfo) {
     if (userInfo['fullName'] != null) {
       _userInfo['fullName'] = userInfo['fullName'];
     }
@@ -50,9 +51,50 @@ class UserProfileProvider with ChangeNotifier {
       await firestoreInstance
           .collection('users')
           .doc(authInstance.currentUser!.uid)
-          .collection('profile')
-          .doc('data')
+          .collection('data')
+          .doc('profile')
           .set(userInfo);
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<void> getUserProfileInfo() async {
+    try {
+      var authInstance = FirebaseAuth.instance;
+      var firestoreInstance = FirebaseFirestore.instance;
+      var documentSnapshot = await firestoreInstance
+          .collection('users')
+          .doc(authInstance.currentUser!.uid)
+          .collection('data')
+          .doc('profile')
+          .get();
+      var snapshotData = documentSnapshot.data();
+      if (snapshotData != null) {
+        setUserInfo = snapshotData;
+        notifyListeners();
+      }
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<void> getUserFriends() async {
+    try {
+      var authInstance = FirebaseAuth.instance;
+      var firestoreInstance = FirebaseFirestore.instance;
+      var documentSnapshot = await firestoreInstance
+          .collection('users')
+          .doc(authInstance.currentUser!.uid)
+          .collection('data')
+          .doc('other')
+          .get();
+      var snapshotData = documentSnapshot.data();
+      if (snapshotData != null) {
+        for (String friend in snapshotData['friends']) {
+          _userFriends.add(friend);
+        }
+      }
     } catch (error) {
       rethrow;
     }

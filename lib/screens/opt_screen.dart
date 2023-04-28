@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
+import '../providers/user_data_provider.dart';
 import '../widgets/resend_otp_button.dart';
 import '../widgets/show_dialog.dart';
 import '../helpers/auth_exception.dart';
@@ -24,6 +25,8 @@ class _OtpScreenState extends State<OtpScreen> {
 
   Future<void> _confirmOtp(AuthProvider authProvider) async {
     try {
+      final profileProvider =
+          Provider.of<UserDataProvider>(context, listen: false);
       var isValid = _formKey.currentState!.validate();
       if (isValid) {
         _formKey.currentState!.save();
@@ -34,6 +37,7 @@ class _OtpScreenState extends State<OtpScreen> {
         showCustomDialog(context,
             content: 'Loading...', showActionButton: false);
         await authProvider.authenticateWithCredentials(_smsCode);
+        await profileProvider.getUserProfileInfo();
         setState(() {
           _isAuthenticated = true;
         });
@@ -105,7 +109,7 @@ class _OtpScreenState extends State<OtpScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Text(
-                          'We have sent you an SMS with the code at ${authProvider.otpCredentials['phone']}',
+                          'We have sent you an SMS with the code at ${authProvider.userCredentials['phone']}',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Theme.of(context)

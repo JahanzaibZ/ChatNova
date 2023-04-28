@@ -1,25 +1,25 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/auth_type.dart';
 import '../helpers/auth_exception.dart';
 
 class AuthProvider with ChangeNotifier {
   final _authInstance = FirebaseAuth.instance;
-  final Map<String, String?> _userCredentials = {
+  final Map<String, dynamic> _userCredentials = {
     'phone': null,
     'email': null,
     'password': null,
   };
 
-  Map<String, Object?> get userCredentials {
+  Map<String, dynamic> get userCredentials {
     return {..._userCredentials};
   }
 
-  set setUserCredentials(Map<String, String?> userCreds) {
+  set setUserCredentials(Map<String, dynamic> userCreds) {
     if (userCreds['phone'] != null) {
       _userCredentials['phone'] = userCreds['phone'];
     }
@@ -39,8 +39,7 @@ class AuthProvider with ChangeNotifier {
   };
 
   Map<String, Object?> get otpCredentials {
-    var optCreds = _otpCredentials;
-    return optCreds;
+    return {..._otpCredentials};
   }
 
   set setOtpCredentials(Map<String, Object?> otpCreds) {
@@ -60,23 +59,30 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<dynamic> prefsIsNewUser([bool? setKey]) async {
-    var prefs = await SharedPreferences.getInstance();
-    if (setKey != null && setKey == true) {
-      prefs.setBool('isNewUser', true);
-      notifyListeners();
-      return;
-    } else if (setKey != null && setKey == false) {
-      prefs.setBool('isNewUser', false);
-      notifyListeners();
-      return;
-    } else {
-      if (prefs.containsKey('isNewUser')) {
-        if (prefs.getBool('isNewUser') == false) {
-          return false;
+  Future<dynamic> isNewUser([bool? setKey]) async {
+    try {
+      var authInstance = FirebaseAuth.instance;
+      var firestoreInstance = FirebaseFirestore.instance
+          .collection('users')
+          .doc(authInstance.currentUser!.uid)
+          .collection('data')
+          .doc('other');
+      if (setKey == true) {
+        await firestoreInstance.set({'isNewUser': setKey});
+        notifyListeners();
+      } else if (setKey == false) {
+        await firestoreInstance.set({'isNewUser': setKey});
+        notifyListeners();
+      } else {
+        var snapshot = await firestoreInstance.get();
+        var data = snapshot.data();
+        if (data != null && data.containsKey('isNewUser')) {
+          return data['isNewUser'];
+        } else {
+          return true;
         }
-        return true;
       }
+    } catch (error) {
       return true;
     }
   }
@@ -133,14 +139,12 @@ class AuthProvider with ChangeNotifier {
           password: _userCredentials['password']!,
         );
 
-        await prefsIsNewUser(true);
+        await isNewUser(true);
       } else {
         await _authInstance.signInWithEmailAndPassword(
           email: _userCredentials['email']!,
           password: _userCredentials['password']!,
         );
-
-        await prefsIsNewUser(false);
       }
       return;
     } on FirebaseAuthException catch (error) {
@@ -176,8 +180,11 @@ class AuthProvider with ChangeNotifier {
       PhoneAuthCredential phoneAuthCredential = PhoneAuthProvider.credential(
           verificationId: _otpCredentials['verificationId'] as String,
           smsCode: smsCode);
-      await FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
-      await prefsIsNewUser(true);
+      var userCreds =
+          await FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
+      if (userCreds.additionalUserInfo?.isNewUser == true) {
+        await isNewUser(true);
+      }
     } on FirebaseAuthException catch (error) {
       String message;
       if (error.code == 'account-exists-with-different-credential') {

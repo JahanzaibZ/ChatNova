@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
-import '../providers/user_profile_provider.dart';
+import '../providers/user_data_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/show_dialog.dart';
 import '../helpers/disabled_focus_node.dart';
@@ -33,7 +33,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   Future<void> _saveForm() async {
     try {
       var profileProvider =
-          Provider.of<UserProfileProvider>(context, listen: false);
+          Provider.of<UserDataProvider>(context, listen: false);
       var authProvider = Provider.of<AuthProvider>(context, listen: false);
       var isValid = _formKey.currentState!.validate();
       if (isValid) {
@@ -51,7 +51,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           await profileProvider.uploadProfileImage(_pickedImage!);
         }
         await profileProvider.setUserProfileInfo();
-        await authProvider.prefsIsNewUser(false);
+        await authProvider.isNewUser(false);
         if (!mounted) {
           return;
         }
@@ -71,8 +71,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
   Future<void> _pickImage() async {
     var pickedImage = await ImagePicker().pickImage(
-      maxHeight: 512,
-      maxWidth: 512,
+      maxHeight: 256,
+      maxWidth: 256,
+      imageQuality: 50,
       source: ImageSource.camera,
       preferredCameraDevice: CameraDevice.front,
     );
