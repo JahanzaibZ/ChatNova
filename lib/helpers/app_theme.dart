@@ -20,6 +20,7 @@ ThemeData lightTheme() {
         shadowColor: Colors.transparent,
         foregroundColor: Colors.black),
     inputDecorationTheme: InputDecorationTheme(
+      fillColor: Colors.black.withOpacity(.05),
       hintStyle: TextStyle(
         color: Colors.black.withAlpha(150),
       ),
@@ -61,6 +62,7 @@ ThemeData darkTheme() {
       foregroundColor: Colors.white,
     ),
     inputDecorationTheme: InputDecorationTheme(
+      fillColor: Colors.white.withOpacity(.1),
       hintStyle: TextStyle(
         color: Colors.white.withAlpha(150),
       ),

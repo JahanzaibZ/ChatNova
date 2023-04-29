@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../screens/message_screen.dart';
 import '../providers/user_data_provider.dart';
 
 class NewChatScreen extends StatelessWidget {
@@ -10,7 +11,8 @@ class NewChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Provider.of<UserDataProvider>(context, listen: false).getUserFriends();
+    var userProvider = Provider.of<UserDataProvider>(context, listen: false);
+    var friendList = userProvider.userFriends;
     return Scaffold(
         appBar: AppBar(
           toolbarHeight: kToolbarHeight * 1.25,
@@ -19,7 +21,22 @@ class NewChatScreen extends StatelessWidget {
           ),
         ),
         body: ListView.builder(
-          itemBuilder: (context, index) {},
+          itemCount: userProvider.userFriends.length,
+          itemBuilder: (context, index) => ListTile(
+            leading: CircleAvatar(
+              backgroundImage:
+                  const AssetImage('assets/images/default_profile.png'),
+              foregroundImage: friendList[index]['friendImageURL'] != null
+                  ? NetworkImage(friendList[index]['friendImageURL'])
+                  : null,
+              radius: 30,
+            ),
+            title: Text(friendList[index]['friendName'] ?? 'Unknown'),
+            onTap: () => Navigator.of(context).pushReplacementNamed(
+              MessageScreen.routeName,
+              arguments: friendList[0],
+            ),
+          ),
         ));
   }
 }

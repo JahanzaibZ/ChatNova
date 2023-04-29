@@ -12,9 +12,11 @@ import './screens/auth_screen.dart';
 import './screens/opt_screen.dart';
 import './screens/profile_setup_screen.dart';
 import './screens/privacy_policy_screen.dart';
+import './screens/message_screen.dart';
 import './helpers/app_theme.dart';
 import './providers/auth_provider.dart';
-import 'providers/user_data_provider.dart';
+import './providers/user_data_provider.dart';
+import './providers/messages_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +38,9 @@ class MainApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (context) => UserDataProvider(),
         ),
+        ChangeNotifierProvider(
+          create: (context) => MessagesProvider(),
+        )
       ],
       child: MaterialApp(
         theme: lightTheme(),
@@ -47,18 +52,32 @@ class MainApp extends StatelessWidget {
               return const SplashScreen();
             } else if (snapshot.hasData) {
               return FutureBuilder(
-                future: Provider.of<AuthProvider>(context).isNewUser(),
+                future: Provider.of<AuthProvider>(
+                  context,
+                ).isNewUser(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    debugPrint('executed Futurebuilder waiting...');
                     return const SplashScreen();
                   } else if (snapshot.hasData) {
                     if (snapshot.data == true) {
                       return const ProfileSetupScreen();
                     } else {
-                      return const MainScreen();
+                      return FutureBuilder(
+                        future: Provider.of<UserDataProvider>(context,
+                                listen: false)
+                            .getUserProfileInfo(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const SplashScreen();
+                          } else {
+                            return const MainScreen();
+                          }
+                        },
+                      );
                     }
                   } else {
+                    // This block should not if program is executing correctly...
                     return const MainScreen();
                   }
                 },
@@ -77,6 +96,7 @@ class MainApp extends StatelessWidget {
           PrivacyPolicyScreen.routeName: (context) =>
               const PrivacyPolicyScreen(),
           NewChatScreen.routeName: (context) => const NewChatScreen(),
+          MessageScreen.routeName: (context) => const MessageScreen(),
         },
       ),
     );
