@@ -1,3 +1,4 @@
+import 'package:chatnova/models/app_user.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,8 +23,7 @@ class MessageScreen extends StatelessWidget {
         (kToolbarHeight * 1.25) -
         mediaQuery.padding.vertical -
         mediaQuery.viewInsets.vertical;
-    var friendInfo =
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+    var friend = ModalRoute.of(context)?.settings.arguments as AppUser;
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: kToolbarHeight * 1.25,
@@ -32,15 +32,15 @@ class MessageScreen extends StatelessWidget {
             CircleAvatar(
               backgroundImage:
                   const AssetImage('assets/images/default_profile.png'),
-              foregroundImage: friendInfo['friendImageURL'] != null
-                  ? NetworkImage(friendInfo['friendImageURL'])
+              foregroundImage: friend.profilePictureURL != null
+                  ? NetworkImage(friend.profilePictureURL!)
                   : null,
               radius: 25,
             ),
             const SizedBox(
               width: 20,
             ),
-            Text(friendInfo['friendName']),
+            Text(friend.name!),
           ],
         ),
       ),
@@ -59,7 +59,7 @@ class MessageScreen extends StatelessWidget {
               ),
             ),
             MessageTextfield(
-              recieverId: friendInfo['friendId'],
+              recieverId: friend.id!,
               senderId: FirebaseAuth.instance.currentUser!.uid,
               sendMessage: sendMessage,
             ),

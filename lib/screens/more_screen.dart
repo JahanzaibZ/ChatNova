@@ -10,19 +10,19 @@ class MoreScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var authInstance = FirebaseAuth.instance;
-    var userInfo = Provider.of<UserDataProvider>(context).userInfo;
+    var user = Provider.of<UserDataProvider>(context).user;
     return ListView(
       children: [
         ListTile(
           leading: CircleAvatar(
             backgroundImage:
                 const AssetImage('assets/images/default_profile.png'),
-            foregroundImage: userInfo['profileImageURL'] != null
-                ? NetworkImage(userInfo['profileImageURL']!)
+            foregroundImage: user.profilePictureURL != null
+                ? NetworkImage(user.profilePictureURL!)
                 : null,
             radius: 30,
           ),
-          title: Text(userInfo['fullName'] ?? 'Unknown'),
+          title: Text(user.name ?? 'Unknown'),
           subtitle: Text(
             authInstance.currentUser?.phoneNumber ??
                 authInstance.currentUser?.email ??

@@ -1,10 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
+import '../models/app_user.dart';
 import '../providers/user_data_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/show_dialog.dart';
@@ -20,12 +22,8 @@ class ProfileSetupScreen extends StatefulWidget {
 }
 
 class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
+  var _user = AppUser();
   final _formKey = GlobalKey<FormState>();
-  final Map<String, String?> _userInfo = {
-    'fullName': null,
-    'profileImageURL': null,
-    'dateOfBirth': null,
-  };
   File? _pickedImage;
 
   var _isLoading = false;
@@ -35,6 +33,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       var profileProvider =
           Provider.of<UserDataProvider>(context, listen: false);
       var authProvider = Provider.of<AuthProvider>(context, listen: false);
+      var authInstance = FirebaseAuth.instance;
       var isValid = _formKey.currentState!.validate();
       if (isValid) {
         setState(() {
@@ -46,7 +45,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           showActionButton: false,
         );
         _formKey.currentState!.save();
-        profileProvider.setUserInfo = _userInfo;
+        profileProvider.setUserInfo = _user.copyWith(
+          emailAddress: authInstance.currentUser!.email,
+          phoneNumber: authInstance.currentUser!.phoneNumber,
+        );
         if (_pickedImage != null) {
           await profileProvider.uploadProfileImage(_pickedImage!);
         }
@@ -100,7 +102,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         return;
       }
       setState(() {
-        _userInfo['dateOfBirth'] = dateTime.toIso8601String();
+        _user = _user.copyWith(dateOfBirth: dateTime);
       });
     });
   }
@@ -175,8 +177,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                           }
                           return null;
                         },
-                        onSaved: (newValue) {
-                          _userInfo['fullName'] = newValue;
+                        onSaved: (name) {
+                          _user = _user.copyWith(name: name!.trim());
                         },
                       ),
                       TextFormField(
@@ -184,9 +186,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         enableInteractiveSelection: false,
                         decoration: InputDecoration(
                           labelText: 'Date Of Birth',
-                          hintText: _userInfo['dateOfBirth'] != null
-                              ? DateFormat.yMMMd().format(
-                                  DateTime.parse(_userInfo['dateOfBirth']!))
+                          hintText: _user.dateOfBirth != null
+                              ? DateFormat.yMMMd().format(_user.dateOfBirth!)
                               : 'Not set',
                           floatingLabelBehavior: FloatingLabelBehavior.always,
                           suffixIcon: InkWell(
@@ -195,7 +196,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                           ),
                         ),
                         validator: (_) {
-                          if (_userInfo['dateOfBirth'] == null) {
+                          if (_user.dateOfBirth == null) {
                             return 'Please set your date of birth!';
                           }
                           return null;

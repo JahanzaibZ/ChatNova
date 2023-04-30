@@ -26,12 +26,12 @@ class NewChatScreen extends StatelessWidget {
             leading: CircleAvatar(
               backgroundImage:
                   const AssetImage('assets/images/default_profile.png'),
-              foregroundImage: friendList[index]['friendImageURL'] != null
-                  ? NetworkImage(friendList[index]['friendImageURL'])
+              foregroundImage: friendList[index].profilePictureURL != null
+                  ? NetworkImage(friendList[index].profilePictureURL!)
                   : null,
               radius: 30,
             ),
-            title: Text(friendList[index]['friendName'] ?? 'Unknown'),
+            title: Text(friendList[index].name ?? 'Unknown'),
             onTap: () => Navigator.of(context).pushReplacementNamed(
               MessageScreen.routeName,
               arguments: friendList[0],

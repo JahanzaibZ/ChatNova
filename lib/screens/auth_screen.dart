@@ -166,7 +166,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               .requestFocus(_passwordTextFieldFocusNode),
                           onSaved: (newValue) {
                             authProvider.setUserCredentials = {
-                              'email': newValue
+                              'email': newValue!.trim()
                             };
                           },
                           validator: (value) {

@@ -5,32 +5,22 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class UserDataProvider with ChangeNotifier {
-  final Map<String, dynamic> _userInfo = {
-    'fullName': null,
-    'profileImageURL': null,
-    'dateOfBirth': null,
-  };
-  final List<Map<String, dynamic>> _userFriends = [];
+import '../models/app_user.dart';
 
-  Map<String, dynamic> get userInfo {
-    return {..._userInfo};
+class UserDataProvider with ChangeNotifier {
+  var _user = AppUser();
+  final List<AppUser> _userFriends = [];
+
+  AppUser get user {
+    return _user;
   }
 
-  List<Map<String, dynamic>> get userFriends {
+  List<AppUser> get userFriends {
     return [..._userFriends];
   }
 
-  set setUserInfo(Map<String, dynamic> userInfo) {
-    if (userInfo['fullName'] != null) {
-      _userInfo['fullName'] = userInfo['fullName'];
-    }
-    if (userInfo['profileImageURL'] != null) {
-      _userInfo['profileImageURL'] = userInfo['profileImageURL'];
-    }
-    if (userInfo['dateOfBirth'] != null) {
-      _userInfo['dateOfBirth'] = userInfo['dateOfBirth'];
-    }
+  set setUserInfo(AppUser user) {
+    _user = user;
   }
 
   // set addUserFriend(String friendId) {
@@ -46,7 +36,8 @@ class UserDataProvider with ChangeNotifier {
           .child('profile_images')
           .child('${authInstance.currentUser!.uid}.jpg');
       await storageRef.putFile(pickedImage).whenComplete(() async {
-        _userInfo['profileImageURL'] = await storageRef.getDownloadURL();
+        _user = _user.copyWith(
+            profilePictureURL: await storageRef.getDownloadURL());
       });
     } catch (error) {
       rethrow;
@@ -62,7 +53,14 @@ class UserDataProvider with ChangeNotifier {
           .doc(authInstance.currentUser!.uid)
           .collection('data')
           .doc('profile')
-          .set(userInfo);
+          .set({
+        'name': _user.name,
+        'emailAddress': _user.emailAddress,
+        'phoneNumber': _user.phoneNumber,
+        'profilePictureURL': _user.profilePictureURL,
+        'dateOfBirth': Timestamp.fromDate(_user.dateOfBirth!),
+        'isPro': _user.isPro,
+      });
     } catch (error) {
       rethrow;
     }
@@ -81,7 +79,15 @@ class UserDataProvider with ChangeNotifier {
       var snapshotData = documentSnapshot.data();
       await fetchAndSetUserFriends(onlyFetch: true);
       if (snapshotData != null) {
-        setUserInfo = snapshotData;
+        _user = AppUser(
+          id: authInstance.currentUser!.uid,
+          name: snapshotData['name'],
+          emailAddress: snapshotData['emailAddress'],
+          phoneNumber: snapshotData['phoneNumber'],
+          profilePictureURL: snapshotData['profilePictureURL'],
+          dateOfBirth: (snapshotData['dateOfBirth'] as Timestamp).toDate(),
+          isPro: snapshotData['isPro'],
+        );
         notifyListeners();
       }
     } catch (error) {
@@ -99,17 +105,13 @@ class UserDataProvider with ChangeNotifier {
           .collection('data')
           .doc('other');
       if (!onlyFetch) {
-        await firestoreFriendsPath.set({
-          'friends': _userFriends.map((friend) => friend['friendId']).toList()
-        });
+        await firestoreFriendsPath
+            .set({'friends': _userFriends.map((friend) => friend.id).toList()});
       }
       var documentSnapshot = await firestoreFriendsPath.get();
       var snapshotData = documentSnapshot.data();
-      // debugPrint(
-      //     'snapshotData: ${snapshotData!['friends']}\n_userFriendsMapping: ${_userFriends.map((friend) => friend['friendId']).toList()}');
-      // debugPrint(
-      //     'Condition: ${_userFriends.map((friend) => friend['friendId']).toList() != snapshotData['friends'] as List<dynamic>}');
-      if (snapshotData != null) {
+      if (snapshotData != null && snapshotData['friends'] != null) {
+        _userFriends.clear();
         for (String friendId in snapshotData['friends']) {
           documentSnapshot = await firestoreInstance
               .collection('users')
@@ -119,18 +121,20 @@ class UserDataProvider with ChangeNotifier {
               .get();
           var documentData = documentSnapshot.data();
           if (documentData != null) {
-            _userFriends.clear();
-            _userFriends.add({
-              'friendId': friendId,
-              'friendName': documentData['fullName'],
-              'friendImageURL': documentData['profileImageURL']
-            });
+            _userFriends.add(AppUser(
+              id: friendId,
+              name: documentData['name'],
+              emailAddress: documentData['emailAddress'],
+              phoneNumber: documentData['phoneNumber'],
+              profilePictureURL: documentData['profilePictureURL'],
+              dateOfBirth: (documentData['dateOfBirth'] as Timestamp).toDate(),
+              isPro: documentData['isPro'],
+            ));
           }
         }
         notifyListeners();
       }
     } catch (error) {
-      debugPrint('Error occured! $error');
       rethrow;
     }
   }
