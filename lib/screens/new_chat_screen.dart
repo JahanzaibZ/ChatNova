@@ -22,19 +22,22 @@ class NewChatScreen extends StatelessWidget {
         ),
         body: ListView.builder(
           itemCount: userProvider.userFriends.length,
-          itemBuilder: (context, index) => ListTile(
-            leading: CircleAvatar(
-              backgroundImage:
-                  const AssetImage('assets/images/default_profile.png'),
-              foregroundImage: friendList[index].profilePictureURL != null
-                  ? NetworkImage(friendList[index].profilePictureURL!)
-                  : null,
-              radius: 30,
-            ),
-            title: Text(friendList[index].name ?? 'Unknown'),
-            onTap: () => Navigator.of(context).pushReplacementNamed(
-              MessageScreen.routeName,
-              arguments: friendList[0],
+          itemBuilder: (context, index) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundImage:
+                    const AssetImage('assets/images/default_profile.png'),
+                foregroundImage: friendList[index].profilePictureURL != null
+                    ? NetworkImage(friendList[index].profilePictureURL!)
+                    : null,
+                radius: 30,
+              ),
+              title: Text(friendList[index].name ?? 'Unknown'),
+              onTap: () => Navigator.of(context).pushReplacementNamed(
+                MessageScreen.routeName,
+                arguments: friendList[index],
+              ),
             ),
           ),
         ));

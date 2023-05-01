@@ -65,7 +65,7 @@ class MainApp extends StatelessWidget {
                       return FutureBuilder(
                         future: Provider.of<UserDataProvider>(context,
                                 listen: false)
-                            .getUserProfileInfo(),
+                            .fetchAndSetUserProfileInfo(onlyFetch: true),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {

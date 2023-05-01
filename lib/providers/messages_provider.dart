@@ -17,9 +17,5 @@ class MessagesProvider with ChangeNotifier {
       'senderId': message.senderId,
       'receiverId': message.receiverId,
     });
-
-    // Future<void> receiveMessage() async {
-    //   StreamBuilder(stream: FirebaseFirestore.instance.collection(''),);
-    // }
   }
 }

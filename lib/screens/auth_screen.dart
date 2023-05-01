@@ -7,7 +7,6 @@ import 'package:intl_phone_field/intl_phone_field.dart';
 import './opt_screen.dart';
 import '../widgets/show_dialog.dart';
 import '../providers/auth_provider.dart';
-import '../providers/user_data_provider.dart';
 import '../helpers/auth_type.dart';
 import '../helpers/auth_exception.dart';
 
@@ -31,8 +30,6 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> _submitForm() async {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final profileProvider =
-          Provider.of<UserDataProvider>(context, listen: false);
       var isValid = _formKey.currentState!.validate();
       if (isValid) {
         _formKey.currentState!.save();
@@ -54,7 +51,6 @@ class _AuthScreenState extends State<AuthScreen> {
           }
         } else {
           await authProvider.authenticateWithEmailAndPassword(_authType);
-          await profileProvider.getUserProfileInfo();
           if (mounted) {
             Navigator.of(context).popUntil((route) => route.isFirst);
           }

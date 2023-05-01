@@ -52,7 +52,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         if (_pickedImage != null) {
           await profileProvider.uploadProfileImage(_pickedImage!);
         }
-        await profileProvider.setUserProfileInfo();
+        await profileProvider.fetchAndSetUserProfileInfo();
         await authProvider.isNewUser(false);
         if (!mounted) {
           return;

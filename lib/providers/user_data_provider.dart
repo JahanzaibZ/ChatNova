@@ -24,8 +24,7 @@ class UserDataProvider with ChangeNotifier {
   }
 
   // set addUserFriend(String friendId) {
-  //   _userFriends.add(friendId);
-  //   fetchAndSetUserFriends();
+  //   To be implemented!
   // }
 
   Future<void> uploadProfileImage(File pickedImage) async {
@@ -44,38 +43,27 @@ class UserDataProvider with ChangeNotifier {
     }
   }
 
-  Future<void> setUserProfileInfo() async {
+  Future<void> fetchAndSetUserProfileInfo({bool onlyFetch = false}) async {
     try {
+      debugPrint('Function Executed!');
       var authInstance = FirebaseAuth.instance;
       var firestoreInstance = FirebaseFirestore.instance;
-      await firestoreInstance
+      var firestoreUserPath = firestoreInstance
           .collection('users')
           .doc(authInstance.currentUser!.uid)
           .collection('data')
-          .doc('profile')
-          .set({
-        'name': _user.name,
-        'emailAddress': _user.emailAddress,
-        'phoneNumber': _user.phoneNumber,
-        'profilePictureURL': _user.profilePictureURL,
-        'dateOfBirth': Timestamp.fromDate(_user.dateOfBirth!),
-        'isPro': _user.isPro,
-      });
-    } catch (error) {
-      rethrow;
-    }
-  }
-
-  Future<void> getUserProfileInfo() async {
-    try {
-      var authInstance = FirebaseAuth.instance;
-      var firestoreInstance = FirebaseFirestore.instance;
-      var documentSnapshot = await firestoreInstance
-          .collection('users')
-          .doc(authInstance.currentUser!.uid)
-          .collection('data')
-          .doc('profile')
-          .get();
+          .doc('profile');
+      if (!onlyFetch) {
+        await firestoreUserPath.set({
+          'name': _user.name,
+          'emailAddress': _user.emailAddress,
+          'phoneNumber': _user.phoneNumber,
+          'profilePictureURL': _user.profilePictureURL,
+          'dateOfBirth': Timestamp.fromDate(_user.dateOfBirth!),
+          'isPro': _user.isPro,
+        });
+      }
+      var documentSnapshot = await firestoreUserPath.get();
       var snapshotData = documentSnapshot.data();
       await fetchAndSetUserFriends(onlyFetch: true);
       if (snapshotData != null) {
@@ -112,6 +100,7 @@ class UserDataProvider with ChangeNotifier {
       var snapshotData = documentSnapshot.data();
       if (snapshotData != null && snapshotData['friends'] != null) {
         _userFriends.clear();
+        debugPrint('snapshotData: ${snapshotData['friends']}');
         for (String friendId in snapshotData['friends']) {
           documentSnapshot = await firestoreInstance
               .collection('users')
@@ -132,6 +121,8 @@ class UserDataProvider with ChangeNotifier {
             ));
           }
         }
+
+        debugPrint('userFriends: $_userFriends');
         notifyListeners();
       }
     } catch (error) {
