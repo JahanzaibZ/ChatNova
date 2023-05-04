@@ -88,7 +88,7 @@ class AuthTypeScreen extends StatelessWidget {
                           Size(deviceSize.width * .8, deviceSize.height * .07),
                     ),
                     onPressed: () => navigateToScreen(
-                        context, AuthType.signUpWithEmailAddress),
+                        context, AuthType.signInWithEmailAddress),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: const [

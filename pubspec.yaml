@@ -10,7 +10,6 @@ dependencies:
   flutter:
     sdk: flutter
   cloud_firestore: ^4.5.2
-  firebase_app_check: ^0.1.2+2
   firebase_auth: ^4.4.2
   firebase_core: ^2.10.0
   firebase_storage: ^11.1.1

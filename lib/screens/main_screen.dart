@@ -1,5 +1,9 @@
+import 'dart:async';
+
+import 'package:chatnova/providers/user_data_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 
 import '../screens/live_chat_screen.dart';
 import '../screens/chat_screen.dart';
@@ -17,6 +21,25 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   var currentIndex = 1;
+  late StreamSubscription streamSubscription;
+
+  @override
+  void initState() {
+    startSubscription();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    streamSubscription.cancel();
+    super.dispose();
+  }
+
+  Future<void> startSubscription() async {
+    streamSubscription =
+        await Provider.of<UserDataProvider>(context, listen: false)
+            .listenAndReadMessasgesFromFirestore();
+  }
 
   PreferredSizeWidget _scaffoldAppBar() {
     var title = 'Chat';

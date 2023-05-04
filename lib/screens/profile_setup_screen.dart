@@ -114,13 +114,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         mediaQuery.padding.top -
         mediaQuery.padding.bottom;
     return Scaffold(
-      // appBar: AppBar(
-      //   actions: [
-      //     IconButton(
-      //         onPressed: () => FirebaseAuth.instance.signOut(),
-      //         icon: const Icon(Icons.logout))
-      //   ],
-      // ),
       body: SingleChildScrollView(
         child: Container(
           padding:
@@ -167,6 +160,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       TextFormField(
+                        textCapitalization: TextCapitalization.words,
                         decoration: const InputDecoration(
                             floatingLabelBehavior: FloatingLabelBehavior.always,
                             labelText: 'Full Name',

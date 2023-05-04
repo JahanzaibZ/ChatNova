@@ -1,11 +1,31 @@
+import '../models/app_user.dart';
+
 class Chat {
-  final String? id;
-  final String? receiverId;
+  final int? numberOfUnreadMessages;
+  final AppUser? receiver;
+  final String? lastMessageText;
   final DateTime? lastMessageTimeStamp;
 
   Chat({
-    this.id,
-    this.receiverId,
+    this.numberOfUnreadMessages,
+    this.receiver,
+    this.lastMessageText,
     this.lastMessageTimeStamp,
   });
+
+  Chat copyWith(
+      {int? numberOfUnreadMessages,
+      AppUser? receiver,
+      String? lastMessageText,
+      DateTime? lastMessageTimeStamp}) {
+    {
+      return Chat(
+        numberOfUnreadMessages:
+            numberOfUnreadMessages ?? this.numberOfUnreadMessages,
+        receiver: receiver ?? this.receiver,
+        lastMessageText: lastMessageText ?? this.lastMessageText,
+        lastMessageTimeStamp: lastMessageTimeStamp ?? this.lastMessageTimeStamp,
+      );
+    }
+  }
 }

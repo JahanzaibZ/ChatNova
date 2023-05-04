@@ -45,6 +45,7 @@ class _MessageTextfieldState extends State<MessageTextfield> {
               Expanded(
                 child: TextField(
                   controller: _messageTextEditingController,
+                  textCapitalization: TextCapitalization.sentences,
                   onChanged: (value) {
                     setState(() {});
                   },
@@ -66,7 +67,8 @@ class _MessageTextfieldState extends State<MessageTextfield> {
                 ),
                 onPressed: _messageTextEditingController.text.isEmpty
                     ? null
-                    : () => widget.sendMessage(
+                    : () {
+                        widget.sendMessage(
                           context,
                           Message(
                             text: _messageTextEditingController.text,
@@ -74,7 +76,9 @@ class _MessageTextfieldState extends State<MessageTextfield> {
                             senderId: widget.senderId,
                             receiverId: widget.recieverId,
                           ),
-                        ),
+                        );
+                        _messageTextEditingController.clear();
+                      },
                 icon: const Icon(Icons.send_rounded),
               )
             ],
