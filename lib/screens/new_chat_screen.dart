@@ -33,7 +33,7 @@ class NewChatScreen extends StatelessWidget {
                     : null,
                 radius: 30,
               ),
-              title: Text(friendList[index].name ?? 'Unknown'),
+              title: Text(friendList[index].name),
               onTap: () => Navigator.of(context).pushReplacementNamed(
                 MessageScreen.routeName,
                 arguments: friendList[index],

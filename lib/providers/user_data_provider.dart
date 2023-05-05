@@ -11,7 +11,7 @@ import '../models/chat.dart';
 import '../models/message.dart';
 
 class UserDataProvider with ChangeNotifier {
-  var _user = AppUser();
+  late AppUser _user;
   final List<AppUser> _userFriends = [];
   final List<Chat> _chats = [];
   final List<Message> _messages = [];
@@ -67,7 +67,8 @@ class UserDataProvider with ChangeNotifier {
           'emailAddress': _user.emailAddress,
           'phoneNumber': _user.phoneNumber,
           'profilePictureURL': _user.profilePictureURL,
-          'dateOfBirth': Timestamp.fromDate(_user.dateOfBirth!),
+          'dateOfBirth': Timestamp.fromDate(_user.dateOfBirth),
+          'interests': _user.interests,
           'isPro': _user.isPro,
         });
       }
@@ -75,6 +76,7 @@ class UserDataProvider with ChangeNotifier {
       var snapshotData = documentSnapshot.data();
       await fetchAndSetUserFriends(onlyFetch: true);
       if (snapshotData != null) {
+        debugPrint('Interests List: ${snapshotData['interests']}');
         _user = AppUser(
           id: authInstance.currentUser!.uid,
           name: snapshotData['name'],
@@ -82,6 +84,7 @@ class UserDataProvider with ChangeNotifier {
           phoneNumber: snapshotData['phoneNumber'],
           profilePictureURL: snapshotData['profilePictureURL'],
           dateOfBirth: (snapshotData['dateOfBirth'] as Timestamp).toDate(),
+          interests: <String>[...snapshotData['interests']],
           isPro: snapshotData['isPro'],
         );
         notifyListeners();
@@ -124,6 +127,7 @@ class UserDataProvider with ChangeNotifier {
               phoneNumber: documentData['phoneNumber'],
               profilePictureURL: documentData['profilePictureURL'],
               dateOfBirth: (documentData['dateOfBirth'] as Timestamp).toDate(),
+              interests: <String>[...documentData['interests']],
               isPro: documentData['isPro'],
             ));
           }
@@ -150,6 +154,8 @@ class UserDataProvider with ChangeNotifier {
       emailAddress: documentData['emailAddress'],
       phoneNumber: documentData['phoneNumber'],
       profilePictureURL: documentData['profilePictureURL'],
+      dateOfBirth: (documentData['dateOfBirth'] as Timestamp).toDate(),
+      interests: <String>[...documentData['interests']],
       isPro: documentData['isPro'],
     );
   }
@@ -216,12 +222,12 @@ class UserDataProvider with ChangeNotifier {
     var currentUserId = FirebaseAuth.instance.currentUser!.uid;
     for (var message in messages) {
       var chatIndex = _chats.indexWhere((chat) =>
-          (chat.receiver!.id == message.receiverId ||
-              chat.receiver!.id == message.senderId));
+          (chat.receiver.id == message.receiverId ||
+              chat.receiver.id == message.senderId));
       if (chatIndex != -1) {
         if (_chats[chatIndex]
-            .lastMessageTimeStamp!
-            .isBefore(message.timeStamp!)) {
+            .lastMessageTimeStamp
+            .isBefore(message.timeStamp)) {
           _chats[chatIndex] = _chats[chatIndex].copyWith(
               lastMessageText: message.text,
               lastMessageTimeStamp: message.timeStamp);
@@ -231,13 +237,13 @@ class UserDataProvider with ChangeNotifier {
       if (chatIndex == -1) {
         var chatReceiver = fetchUnknownUserFromFriendsList(
               message.senderId == currentUserId
-                  ? message.receiverId!
-                  : message.senderId!,
+                  ? message.receiverId
+                  : message.senderId,
             ) ??
             await fetchUnknownUserInfo(
               message.senderId == currentUserId
-                  ? message.receiverId!
-                  : message.senderId!,
+                  ? message.receiverId
+                  : message.senderId,
             );
         _chats.add(Chat(
           receiver: chatReceiver,

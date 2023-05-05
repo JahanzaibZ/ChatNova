@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 import '../providers/user_data_provider.dart';
 import '../screens/message_screen.dart';
@@ -20,7 +21,7 @@ class _ChatScreenState extends State<ChatScreen> {
       (chat) {
         if (searchFieldTextEditingController.text.isEmpty) {
           return true;
-        } else if (chat.receiver!.name!
+        } else if (chat.receiver.name
             .toLowerCase()
             .contains(searchFieldTextEditingController.text.toLowerCase())) {
           return true;
@@ -28,7 +29,11 @@ class _ChatScreenState extends State<ChatScreen> {
           return false;
         }
       },
-    ).toList();
+    ).toList()
+      ..sort(
+        (chatA, chatB) =>
+            chatB.lastMessageTimeStamp.compareTo(chatA.lastMessageTimeStamp),
+      );
     return Column(
       children: [
         Padding(
@@ -61,17 +66,27 @@ class _ChatScreenState extends State<ChatScreen> {
                     backgroundImage:
                         const AssetImage('assets/images/default_profile.png'),
                     foregroundImage: filteredChats[index]
-                                .receiver!
+                                .receiver
                                 .profilePictureURL !=
                             null
                         ? NetworkImage(
-                            filteredChats[index].receiver!.profilePictureURL!)
+                            filteredChats[index].receiver.profilePictureURL!)
                         : null,
                     radius: 30,
                   ),
-                  title: Text(filteredChats[index].receiver!.name ?? 'Unknown'),
+                  title: Text(filteredChats[index].receiver.name),
                   subtitle: Text(
-                    filteredChats[index].lastMessageText ?? 'Unknown',
+                    filteredChats[index].lastMessageText,
+                    style: TextStyle(
+                        color: Theme.of(context)
+                            .textTheme
+                            .bodySmall!
+                            .color!
+                            .withOpacity(.5)),
+                  ),
+                  trailing: Text(
+                    DateFormat.jm()
+                        .format(filteredChats[index].lastMessageTimeStamp),
                     style: TextStyle(
                         color: Theme.of(context)
                             .textTheme

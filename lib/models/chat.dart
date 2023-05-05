@@ -2,15 +2,15 @@ import '../models/app_user.dart';
 
 class Chat {
   final int? numberOfUnreadMessages;
-  final AppUser? receiver;
-  final String? lastMessageText;
-  final DateTime? lastMessageTimeStamp;
+  final AppUser receiver;
+  final String lastMessageText;
+  final DateTime lastMessageTimeStamp;
 
   Chat({
     this.numberOfUnreadMessages,
-    this.receiver,
-    this.lastMessageText,
-    this.lastMessageTimeStamp,
+    required this.receiver,
+    required this.lastMessageText,
+    required this.lastMessageTimeStamp,
   });
 
   Chat copyWith(

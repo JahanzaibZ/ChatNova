@@ -53,7 +53,7 @@ class MessageScreen extends StatelessWidget {
             const SizedBox(
               width: 20,
             ),
-            Text(friend.name!),
+            Text(friend.name),
           ],
         ),
       ),
@@ -71,8 +71,8 @@ class MessageScreen extends StatelessWidget {
                       itemCount: messages.length,
                       itemBuilder: (context, index) {
                         return MessageBubble(
-                          message: messages[index].text!,
-                          timeStamp: messages[index].timeStamp!,
+                          message: messages[index].text,
+                          timeStamp: messages[index].timeStamp,
                           mainUserMessage:
                               messages[index].senderId == currentUserId,
                         );

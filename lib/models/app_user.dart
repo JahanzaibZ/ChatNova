@@ -1,20 +1,22 @@
 class AppUser {
   final String? id;
-  final String? name;
+  final String name;
   final String? emailAddress;
   final String? phoneNumber;
   final String? profilePictureURL;
-  final DateTime? dateOfBirth;
-  final bool? isPro;
+  final DateTime dateOfBirth;
+  final List<String> interests;
+  final bool isPro;
 
   AppUser({
     this.id,
-    this.name,
+    required this.name,
     this.emailAddress,
     this.phoneNumber,
     this.profilePictureURL,
-    this.dateOfBirth,
-    this.isPro,
+    required this.dateOfBirth,
+    required this.interests,
+    this.isPro = false,
   });
 
   AppUser copyWith(
@@ -24,6 +26,7 @@ class AppUser {
       String? phoneNumber,
       String? profilePictureURL,
       DateTime? dateOfBirth,
+      List<String>? interests,
       bool? isPro}) {
     return AppUser(
       id: id ?? this.id,
@@ -32,6 +35,7 @@ class AppUser {
       phoneNumber: phoneNumber ?? this.phoneNumber,
       profilePictureURL: profilePictureURL ?? this.profilePictureURL,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      interests: interests ?? this.interests,
       isPro: isPro ?? this.isPro,
     );
   }

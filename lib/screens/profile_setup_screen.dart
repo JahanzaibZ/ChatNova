@@ -22,9 +22,14 @@ class ProfileSetupScreen extends StatefulWidget {
 }
 
 class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
-  var _user = AppUser();
+  AppUser _user = AppUser(
+    name: 'NO_NAME',
+    dateOfBirth: DateTime.now(),
+    interests: ['NO_INTERESTS'],
+  );
   final _formKey = GlobalKey<FormState>();
   File? _pickedImage;
+  DateTime? _pickedDate;
 
   var _isLoading = false;
 
@@ -71,20 +76,75 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     }
   }
 
-  Future<void> _pickImage() async {
-    var pickedImage = await ImagePicker().pickImage(
-      maxHeight: 256,
-      maxWidth: 256,
-      imageQuality: 50,
-      source: ImageSource.camera,
-      preferredCameraDevice: CameraDevice.front,
+  Widget dialogMenuItem({
+    required String assetImage,
+    required String title,
+    required VoidCallback onPressed,
+  }) {
+    return InkWell(
+      onTap: onPressed,
+      child: Row(
+        children: [
+          Image.asset(
+            assetImage,
+            height: 40,
+            width: 40,
+          ),
+          const SizedBox(
+            width: 50,
+          ),
+          Text(title)
+        ],
+      ),
     );
-    if (pickedImage == null) {
-      return;
+  }
+
+  Future<void> _pickImage() async {
+    ImageSource? imageSource = await showDialog(
+      context: context,
+      builder: (context) {
+        return SimpleDialog(
+          contentPadding: const EdgeInsets.all(30),
+          title: const Text(
+            'Choose source',
+            textAlign: TextAlign.center,
+          ),
+          children: [
+            dialogMenuItem(
+              assetImage: 'assets/images/camera_icon_64x64.png',
+              title: 'Camera',
+              onPressed: () => Navigator.of(context).pop(ImageSource.camera),
+            ),
+            const SizedBox(
+              height: 30,
+              child: Divider(
+                indent: 30,
+                endIndent: 30,
+              ),
+            ),
+            dialogMenuItem(
+              assetImage: 'assets/images/gallery_icon_64x64.png',
+              title: 'Gallery',
+              onPressed: () => Navigator.of(context).pop(ImageSource.gallery),
+            ),
+          ],
+        );
+      },
+    );
+    if (imageSource != null) {
+      var pickedImage = await ImagePicker().pickImage(
+        maxHeight: 128,
+        maxWidth: 128,
+        source: imageSource,
+        preferredCameraDevice: CameraDevice.front,
+      );
+      if (pickedImage == null) {
+        return;
+      }
+      setState(() {
+        _pickedImage = File(pickedImage.path);
+      });
     }
-    setState(() {
-      _pickedImage = File(pickedImage.path);
-    });
   }
 
   void _showDatePicker() {
@@ -102,7 +162,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         return;
       }
       setState(() {
-        _user = _user.copyWith(dateOfBirth: dateTime);
+        _pickedDate = dateTime;
       });
     });
   }
@@ -180,8 +240,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         enableInteractiveSelection: false,
                         decoration: InputDecoration(
                           labelText: 'Date Of Birth',
-                          hintText: _user.dateOfBirth != null
-                              ? DateFormat.yMMMd().format(_user.dateOfBirth!)
+                          hintText: _pickedDate != null
+                              ? DateFormat.yMMMd().format(_pickedDate!)
                               : 'Not set',
                           floatingLabelBehavior: FloatingLabelBehavior.always,
                           suffixIcon: InkWell(
@@ -189,11 +249,35 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                             child: const Icon(Icons.edit),
                           ),
                         ),
+                        onSaved: (_) {
+                          _user = _user.copyWith(dateOfBirth: _pickedDate);
+                        },
                         validator: (_) {
-                          if (_user.dateOfBirth == null) {
+                          if (_pickedDate == null) {
                             return 'Please set your date of birth!';
                           }
                           return null;
+                        },
+                      ),
+                      TextFormField(
+                        textCapitalization: TextCapitalization.words,
+                        decoration: const InputDecoration(
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            labelText: 'Interests/Hobbies',
+                            hintText: 'e.g. Travel, Video Games'),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter at least one interest/hobby!';
+                          }
+                          return null;
+                        },
+                        onSaved: (interests) {
+                          _user = _user.copyWith(
+                            interests: interests!
+                                .split(',')
+                                .map((string) => string.trim())
+                                .toList(),
+                          );
                         },
                       ),
                       Row(

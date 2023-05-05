@@ -22,7 +22,7 @@ class MoreScreen extends StatelessWidget {
                 : null,
             radius: 30,
           ),
-          title: Text(user.name ?? 'Unknown'),
+          title: Text(user.name),
           subtitle: Text(
             authInstance.currentUser?.phoneNumber ??
                 authInstance.currentUser?.email ??
