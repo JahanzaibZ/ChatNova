@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/app_user.dart';
 import '../models/message.dart';
+import '../screens/profile_screen.dart';
 import '../widgets/message_textfield.dart';
 import '../widgets/message_bubble.dart';
 
@@ -24,13 +25,13 @@ class MessageScreen extends StatelessWidget {
         (kToolbarHeight * 1.25) -
         mediaQuery.padding.vertical -
         mediaQuery.viewInsets.vertical;
-    var friend = ModalRoute.of(context)?.settings.arguments as AppUser;
+    var receiver = ModalRoute.of(context)?.settings.arguments as AppUser;
     var currentUserId = FirebaseAuth.instance.currentUser!.uid;
     var messages =
         Provider.of<UserDataProvider>(context).messages.where((message) {
       if ((message.senderId == currentUserId &&
-              message.receiverId == friend.id) ||
-          (message.senderId == friend.id &&
+              message.receiverId == receiver.id) ||
+          (message.senderId == receiver.id &&
               message.receiverId == currentUserId)) {
         return true;
       } else {
@@ -40,21 +41,32 @@ class MessageScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: kToolbarHeight * 1.25,
-        title: Row(
-          children: [
-            CircleAvatar(
-              backgroundImage:
-                  const AssetImage('assets/images/default_profile.png'),
-              foregroundImage: friend.profilePictureURL != null
-                  ? NetworkImage(friend.profilePictureURL!)
-                  : null,
-              radius: 25,
-            ),
-            const SizedBox(
-              width: 20,
-            ),
-            Text(friend.name),
-          ],
+        title: InkWell(
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onTap: () => Navigator.of(context).pushNamed(
+            ProfileScreen.routeName,
+            arguments: receiver,
+          ),
+          child: Row(
+            children: [
+              Hero(
+                tag: receiver.id,
+                child: CircleAvatar(
+                  backgroundImage:
+                      const AssetImage('assets/images/default_profile.png'),
+                  foregroundImage: receiver.profilePictureURL != null
+                      ? NetworkImage(receiver.profilePictureURL!)
+                      : null,
+                  radius: 25,
+                ),
+              ),
+              const SizedBox(
+                width: 20,
+              ),
+              Text(receiver.name),
+            ],
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -80,7 +92,7 @@ class MessageScreen extends StatelessWidget {
                     ),
             ),
             MessageTextfield(
-              recieverId: friend.id!,
+              recieverId: receiver.id,
               senderId: currentUserId,
               sendMessage: sendMessage,
             ),

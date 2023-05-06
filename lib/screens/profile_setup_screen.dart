@@ -23,6 +23,7 @@ class ProfileSetupScreen extends StatefulWidget {
 
 class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   AppUser _user = AppUser(
+    id: 'NO_ID',
     name: 'NO_NAME',
     dateOfBirth: DateTime.now(),
     interests: ['NO_INTERESTS'],

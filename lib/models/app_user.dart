@@ -1,5 +1,5 @@
 class AppUser {
-  final String? id;
+  final String id;
   final String name;
   final String? emailAddress;
   final String? phoneNumber;
@@ -9,7 +9,7 @@ class AppUser {
   final bool isPro;
 
   AppUser({
-    this.id,
+    required this.id,
     required this.name,
     this.emailAddress,
     this.phoneNumber,

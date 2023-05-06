@@ -13,6 +13,7 @@ import '../models/message.dart';
 class UserDataProvider with ChangeNotifier {
   late AppUser _user;
   final List<AppUser> _userFriends = [];
+  final List<AppUser> _userBlocks = [];
   final List<Chat> _chats = [];
   final List<Message> _messages = [];
 
@@ -22,6 +23,10 @@ class UserDataProvider with ChangeNotifier {
 
   List<AppUser> get userFriends {
     return [..._userFriends];
+  }
+
+  List<AppUser> get userBlocks {
+    return [..._userBlocks];
   }
 
   List<Chat> get chats {
@@ -34,6 +39,14 @@ class UserDataProvider with ChangeNotifier {
 
   set setUserInfo(AppUser user) {
     _user = user;
+  }
+
+  bool findFriendById(String id) {
+    return !_userFriends.every((friend) => !(friend.id == id));
+  }
+
+  bool findBlockById(String id) {
+    return !_userBlocks.every((block) => !(block.id == id));
   }
 
   Future<void> uploadProfileImage(File pickedImage) async {
@@ -50,6 +63,33 @@ class UserDataProvider with ChangeNotifier {
     } catch (error) {
       rethrow;
     }
+  }
+
+  Future<void> addOrRemoveUserFriendsAndBlocks({
+    bool remove = false,
+    bool block = false,
+    required AppUser user,
+  }) async {
+    if (block) {
+      if (remove) {
+        _userBlocks.removeWhere((block) => block.id == user.id);
+      } else {
+        _userBlocks.add(user);
+        _userFriends.removeWhere((friend) => friend.id == user.id);
+      }
+    } else {
+      if (remove) {
+        _userFriends.removeWhere(
+          (friend) => friend.id == user.id,
+        );
+      } else {
+        _userFriends.add(user);
+        _userBlocks.removeWhere(
+          (block) => block.id == user.id,
+        );
+      }
+    }
+    await fetchAndSetUserFriendsAndBlocks();
   }
 
   Future<void> fetchAndSetUserProfileInfo({bool onlyFetch = false}) async {
@@ -74,9 +114,8 @@ class UserDataProvider with ChangeNotifier {
       }
       var documentSnapshot = await firestoreUserPath.get();
       var snapshotData = documentSnapshot.data();
-      await fetchAndSetUserFriends(onlyFetch: true);
+      await fetchAndSetUserFriendsAndBlocks(onlyFetch: true);
       if (snapshotData != null) {
-        debugPrint('Interests List: ${snapshotData['interests']}');
         _user = AppUser(
           id: authInstance.currentUser!.uid,
           name: snapshotData['name'],
@@ -94,7 +133,7 @@ class UserDataProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchAndSetUserFriends({bool onlyFetch = false}) async {
+  Future<void> fetchAndSetUserFriendsAndBlocks({bool onlyFetch = false}) async {
     try {
       var authInstance = FirebaseAuth.instance;
       var firestoreInstance = FirebaseFirestore.instance;
@@ -104,32 +143,67 @@ class UserDataProvider with ChangeNotifier {
           .collection('data')
           .doc('other');
       if (!onlyFetch) {
-        await firestoreFriendsPath
-            .set({'friends': _userFriends.map((friend) => friend.id).toList()});
+        await firestoreFriendsPath.set(
+          {
+            'friends': _userFriends.map((friend) => friend.id).toList(),
+            'blocks': _userBlocks.map((block) => block.id).toList(),
+            'isNewUser': false,
+          },
+        );
       }
       var documentSnapshot = await firestoreFriendsPath.get();
       var snapshotData = documentSnapshot.data();
-      if (snapshotData != null && snapshotData['friends'] != null) {
-        _userFriends.clear();
-        for (String friendId in snapshotData['friends']) {
-          documentSnapshot = await firestoreInstance
-              .collection('users')
-              .doc(friendId)
-              .collection('data')
-              .doc('profile')
-              .get();
-          var documentData = documentSnapshot.data();
-          if (documentData != null) {
-            _userFriends.add(AppUser(
-              id: friendId,
-              name: documentData['name'],
-              emailAddress: documentData['emailAddress'],
-              phoneNumber: documentData['phoneNumber'],
-              profilePictureURL: documentData['profilePictureURL'],
-              dateOfBirth: (documentData['dateOfBirth'] as Timestamp).toDate(),
-              interests: <String>[...documentData['interests']],
-              isPro: documentData['isPro'],
-            ));
+      if (snapshotData != null) {
+        if (snapshotData['friends'] != null) {
+          _userFriends.clear();
+          for (String friendId in snapshotData['friends']) {
+            documentSnapshot = await firestoreInstance
+                .collection('users')
+                .doc(friendId)
+                .collection('data')
+                .doc('profile')
+                .get();
+            var documentData = documentSnapshot.data();
+            if (documentData != null) {
+              _userFriends.add(AppUser(
+                id: friendId,
+                name: documentData['name'],
+                emailAddress: documentData['emailAddress'],
+                phoneNumber: documentData['phoneNumber'],
+                profilePictureURL: documentData['profilePictureURL'],
+                dateOfBirth:
+                    (documentData['dateOfBirth'] as Timestamp).toDate(),
+                interests: <String>[...documentData['interests']],
+                isPro: documentData['isPro'],
+              ));
+            }
+          }
+        }
+        if (snapshotData['blocks'] != null) {
+          _userBlocks.clear();
+          for (String blockId in snapshotData['blocks']) {
+            documentSnapshot = await firestoreInstance
+                .collection('users')
+                .doc(blockId)
+                .collection('data')
+                .doc('profile')
+                .get();
+            var documentData = documentSnapshot.data();
+            if (documentData != null) {
+              _userBlocks.add(
+                AppUser(
+                  id: blockId,
+                  name: documentData['name'],
+                  emailAddress: documentData['emailAddress'],
+                  phoneNumber: documentData['phoneNumber'],
+                  profilePictureURL: documentData['profilePictureURL'],
+                  dateOfBirth:
+                      (documentData['dateOfBirth'] as Timestamp).toDate(),
+                  interests: <String>[...documentData['interests']],
+                  isPro: documentData['isPro'],
+                ),
+              );
+            }
           }
         }
         notifyListeners();

@@ -12,6 +12,7 @@ import './screens/opt_screen.dart';
 import './screens/profile_setup_screen.dart';
 import './screens/privacy_policy_screen.dart';
 import './screens/message_screen.dart';
+import './screens/profile_screen.dart';
 import './helpers/app_theme.dart';
 import './providers/auth_provider.dart';
 import './providers/user_data_provider.dart';
@@ -91,6 +92,7 @@ class MainApp extends StatelessWidget {
               const PrivacyPolicyScreen(),
           NewChatScreen.routeName: (context) => const NewChatScreen(),
           MessageScreen.routeName: (context) => const MessageScreen(),
+          ProfileScreen.routeName: (context) => const ProfileScreen(),
         },
       ),
     );
