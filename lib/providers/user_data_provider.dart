@@ -11,7 +11,12 @@ import '../models/chat.dart';
 import '../models/message.dart';
 
 class UserDataProvider with ChangeNotifier {
-  late AppUser _user;
+  var _user = AppUser(
+    id: 'NO_ID',
+    name: 'NO_NAME',
+    dateOfBirth: DateTime.now(),
+    interests: ['NO_INTERESTS'],
+  );
   final List<AppUser> _userFriends = [];
   final List<AppUser> _userBlocks = [];
   final List<Chat> _chats = [];
@@ -70,6 +75,7 @@ class UserDataProvider with ChangeNotifier {
     bool block = false,
     required AppUser user,
   }) async {
+    await Future.delayed(const Duration(milliseconds: 100));
     if (block) {
       if (remove) {
         _userBlocks.removeWhere((block) => block.id == user.id);

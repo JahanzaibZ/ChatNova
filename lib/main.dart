@@ -90,6 +90,7 @@ class MainApp extends StatelessWidget {
           OtpScreen.routeName: (context) => const OtpScreen(),
           PrivacyPolicyScreen.routeName: (context) =>
               const PrivacyPolicyScreen(),
+          ProfileSetupScreen.routeName: (context) => const ProfileSetupScreen(),
           NewChatScreen.routeName: (context) => const NewChatScreen(),
           MessageScreen.routeName: (context) => const MessageScreen(),
           ProfileScreen.routeName: (context) => const ProfileScreen(),

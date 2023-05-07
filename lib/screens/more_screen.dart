@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../screens/profile_setup_screen.dart';
 import '../providers/user_data_provider.dart';
 
 class MoreScreen extends StatelessWidget {
@@ -29,6 +30,10 @@ class MoreScreen extends StatelessWidget {
                 'Unknown',
           ),
           trailing: const Icon(Icons.keyboard_arrow_right),
+          onTap: () => Navigator.of(context).pushNamed(
+            ProfileSetupScreen.routeName,
+            arguments: true,
+          ),
         ),
         const ListTile(
           leading: Icon(

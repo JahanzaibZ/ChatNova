@@ -27,6 +27,9 @@ class _ProfileMenuState extends State<ProfileMenu> {
       child: TextButton.icon(
         onPressed: areButtonEnabled ? onPressed : null,
         style: TextButton.styleFrom(
+            alignment: Alignment.centerLeft,
+            minimumSize: const Size(double.maxFinite, double.minPositive),
+            splashFactory: NoSplash.splashFactory,
             foregroundColor: Theme.of(context).textTheme.bodyMedium?.color),
         icon: Icon(
           icon,

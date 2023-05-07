@@ -64,7 +64,6 @@ class _MainScreenState extends State<MainScreen> {
       ];
     }
     return AppBar(
-      // backgroundColor: Colors.amber,
       toolbarHeight: kToolbarHeight * 1.25,
       title: Text(
         title,
@@ -89,6 +88,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // debugPrint('Main Screen Executed');
     return Scaffold(
       appBar: _scaffoldAppBar(),
       body: _scaffoldBody(),

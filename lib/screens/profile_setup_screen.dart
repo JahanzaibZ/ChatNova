@@ -22,7 +22,7 @@ class ProfileSetupScreen extends StatefulWidget {
 }
 
 class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
-  AppUser _user = AppUser(
+  var _user = AppUser(
     id: 'NO_ID',
     name: 'NO_NAME',
     dateOfBirth: DateTime.now(),
@@ -31,7 +31,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   final _formKey = GlobalKey<FormState>();
   File? _pickedImage;
   DateTime? _pickedDate;
-
+  var _editProfile = false;
   var _isLoading = false;
 
   Future<void> _saveForm() async {
@@ -41,15 +41,21 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       var authProvider = Provider.of<AuthProvider>(context, listen: false);
       var authInstance = FirebaseAuth.instance;
       var isValid = _formKey.currentState!.validate();
+      var scaffoldMessener = ScaffoldMessenger.of(context);
       if (isValid) {
         setState(() {
           _isLoading = true;
         });
-        showCustomDialog(
-          context,
-          content: 'Loading...',
-          showActionButton: false,
-        );
+        if (_editProfile) {
+          scaffoldMessener
+              .showSnackBar(const SnackBar(content: Text('Saving Profile...')));
+        } else {
+          showCustomDialog(
+            context,
+            content: 'Loading...',
+            showActionButton: false,
+          );
+        }
         _formKey.currentState!.save();
         profileProvider.setUserInfo = _user.copyWith(
           emailAddress: authInstance.currentUser!.email,
@@ -59,11 +65,19 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           await profileProvider.uploadProfileImage(_pickedImage!);
         }
         await profileProvider.fetchAndSetUserProfileInfo();
-        await authProvider.isNewUser(false);
-        if (!mounted) {
-          return;
+        if (!_editProfile) {
+          await authProvider.isNewUser(false);
         }
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        if (mounted && _editProfile) {
+          scaffoldMessener.hideCurrentSnackBar();
+          setState(() {
+            _isLoading = false;
+          });
+          scaffoldMessener
+              .showSnackBar(const SnackBar(content: Text('Profile Saved!')));
+        } else if (mounted) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
       }
     } catch (error) {
       Navigator.of(context).pop();
@@ -168,13 +182,44 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     });
   }
 
+  ImageProvider<Object>? _showProfileImage() {
+    if (_pickedImage != null) {
+      return FileImage(_pickedImage!);
+    } else {
+      if (_editProfile) {
+        if (_user.profilePictureURL != null) {
+          return NetworkImage(_user.profilePictureURL!);
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final scaffoldBodyHeight = mediaQuery.size.height -
+        (kToolbarHeight * 1.25) -
         mediaQuery.padding.top -
         mediaQuery.padding.bottom;
+    _editProfile =
+        (ModalRoute.of(context)?.settings.arguments as bool?) ?? false;
+    if (_editProfile) {
+      _user = Provider.of<UserDataProvider>(context).user;
+      _pickedDate ??= _user.dateOfBirth;
+    }
     return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: kTextTabBarHeight * 1.25,
+        title: Text(
+          _editProfile ? 'Edit your profile' : 'Setup your profile',
+          textScaleFactor: 1.25,
+        ),
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
         child: Container(
           padding:
@@ -184,43 +229,37 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           child: Column(
             children: [
               SizedBox(
-                height: scaffoldBodyHeight * .2,
-                child: Center(
-                  child: Text(
-                    'Setup your profile',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: scaffoldBodyHeight * .3,
+                height: scaffoldBodyHeight * .4,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     CircleAvatar(
                       radius: mediaQuery.devicePixelRatio * 40,
-                      foregroundImage: _pickedImage == null
-                          ? null
-                          : FileImage(_pickedImage!),
+                      foregroundImage: _showProfileImage(),
                       backgroundImage: const AssetImage(
                         'assets/images/default_profile.png',
                       ),
                     ),
                     TextButton(
                       onPressed: _pickImage,
-                      child: const Text('Set Image'),
+                      child: Text(_pickedImage != null
+                          ? 'Change Image'
+                          : _user.profilePictureURL != null
+                              ? 'Change Image'
+                              : 'Set Image'),
                     ),
                   ],
                 ),
               ),
               SizedBox(
-                height: scaffoldBodyHeight * .5,
+                height: scaffoldBodyHeight * .6,
                 child: Form(
                   key: _formKey,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       TextFormField(
+                        initialValue: _editProfile ? _user.name : null,
                         textCapitalization: TextCapitalization.words,
                         decoration: const InputDecoration(
                             floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -261,6 +300,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         },
                       ),
                       TextFormField(
+                        initialValue:
+                            _editProfile ? _user.interests.join(', ') : null,
                         textCapitalization: TextCapitalization.words,
                         decoration: const InputDecoration(
                             floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -293,7 +334,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                               ),
                             ),
                             onPressed: _isLoading == true ? null : _saveForm,
-                            child: const Text('Continue'),
+                            child: Text(_editProfile ? 'Save' : 'Continue'),
                           ),
                         ],
                       )
