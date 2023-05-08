@@ -58,7 +58,11 @@ class _MainScreenState extends State<MainScreen> {
       title = 'More';
       actions = [
         IconButton(
-          onPressed: () => FirebaseAuth.instance.signOut(),
+          onPressed: () {
+            Provider.of<UserDataProvider>(context, listen: false)
+                .clearAllLists();
+            FirebaseAuth.instance.signOut();
+          },
           icon: const Icon(Icons.logout_outlined),
         )
       ];

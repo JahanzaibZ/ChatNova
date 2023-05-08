@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../screens/profile_setup_screen.dart';
+import '../screens/manage_users_screen.dart';
 import '../providers/user_data_provider.dart';
 
 class MoreScreen extends StatelessWidget {
@@ -43,13 +44,28 @@ class MoreScreen extends StatelessWidget {
           title: Text('Account'),
           trailing: Icon(Icons.keyboard_arrow_right),
         ),
-        const ListTile(
-          leading: Icon(
-            Icons.chat_bubble_outline,
+        ListTile(
+          leading: const Icon(
+            Icons.group_rounded,
             // size: 30,
           ),
-          title: Text('Chats'),
-          trailing: Icon(Icons.keyboard_arrow_right),
+          title: const Text('Manage Friends'),
+          trailing: const Icon(Icons.keyboard_arrow_right),
+          onTap: () => Navigator.of(context).pushNamed(
+            ManageUsersScreen.routeName,
+            arguments: false,
+          ),
+        ),
+        ListTile(
+          leading: const Icon(
+            Icons.group_off_rounded,
+          ),
+          title: const Text('Manage Blocked Users'),
+          trailing: const Icon(Icons.keyboard_arrow_right),
+          onTap: () => Navigator.of(context).pushNamed(
+            ManageUsersScreen.routeName,
+            arguments: true,
+          ),
         ),
         const SizedBox(
           height: 10,
@@ -57,7 +73,6 @@ class MoreScreen extends StatelessWidget {
         const ListTile(
           leading: Icon(
             Icons.wb_sunny_outlined,
-            // size: 30,
           ),
           title: Text('Appearance'),
           trailing: Icon(Icons.keyboard_arrow_right),
@@ -65,7 +80,6 @@ class MoreScreen extends StatelessWidget {
         const ListTile(
           leading: Icon(
             Icons.notifications_outlined,
-            // size: 30,
           ),
           title: Text('Notification'),
           trailing: Icon(Icons.keyboard_arrow_right),
@@ -73,7 +87,6 @@ class MoreScreen extends StatelessWidget {
         const ListTile(
           leading: Icon(
             Icons.privacy_tip_outlined,
-            // size: 30,
           ),
           title: Text('Privacy'),
           trailing: Icon(Icons.keyboard_arrow_right),
@@ -81,7 +94,6 @@ class MoreScreen extends StatelessWidget {
         const ListTile(
           leading: Icon(
             Icons.folder_outlined,
-            // size: 30,
           ),
           title: Text('Data Usage'),
           trailing: Icon(Icons.keyboard_arrow_right),
@@ -93,7 +105,6 @@ class MoreScreen extends StatelessWidget {
         const ListTile(
           leading: Icon(
             Icons.help_outline,
-            // size: 30,
           ),
           title: Text('Help'),
           trailing: Icon(Icons.keyboard_arrow_right),
@@ -101,7 +112,6 @@ class MoreScreen extends StatelessWidget {
         const ListTile(
           leading: Icon(
             Icons.mail_outline,
-            // size: 30,
           ),
           title: Text('Invite your Friends'),
           trailing: Icon(Icons.keyboard_arrow_right),

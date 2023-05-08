@@ -71,6 +71,7 @@ class _MessageTextfieldState extends State<MessageTextfield> {
                         widget.sendMessage(
                           context,
                           Message(
+                            id: "NO_ID",
                             text: _messageTextEditingController.text,
                             timeStamp: DateTime.now(),
                             senderId: widget.senderId,

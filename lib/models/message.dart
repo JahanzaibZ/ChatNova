@@ -1,12 +1,12 @@
 class Message {
-  final String? id;
+  final String id;
   final String text;
   final DateTime timeStamp;
   final String senderId;
   final String receiverId;
 
   Message({
-    this.id,
+    required this.id,
     required this.text,
     required this.timeStamp,
     required this.senderId,

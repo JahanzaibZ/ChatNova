@@ -17,7 +17,14 @@ class ProfileScreen extends StatelessWidget {
         mediaQuery.padding.top -
         mediaQuery.padding.bottom;
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: BackButton(
+          onPressed: () {
+            ScaffoldMessenger.of(context).removeCurrentSnackBar();
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
       body: ListView(
         children: [
           SizedBox(

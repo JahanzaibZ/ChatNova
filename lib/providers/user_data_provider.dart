@@ -54,6 +54,13 @@ class UserDataProvider with ChangeNotifier {
     return !_userBlocks.every((block) => !(block.id == id));
   }
 
+  void clearAllLists() {
+    _userFriends.clear();
+    _userBlocks.clear();
+    _messages.clear();
+    _chats.clear();
+  }
+
   Future<void> uploadProfileImage(File pickedImage) async {
     try {
       var authInstance = FirebaseAuth.instance;
@@ -277,8 +284,9 @@ class UserDataProvider with ChangeNotifier {
             if (message['receiverId'] == userId ||
                 message['senderId'] == userId) {
               _messages.add(Message(
+                id: messageDocument.id,
                 text: message['text'],
-                receiverId: message['receiverId'],
+                receiverId: message['receiverId'].toString(),
                 senderId: message['senderId'],
                 timeStamp: (message['timeStamp'] as Timestamp).toDate(),
               ));
@@ -298,8 +306,18 @@ class UserDataProvider with ChangeNotifier {
     );
   }
 
+  void deleteMessages(List<Message> messages, String currentUserid) async {
+    var firestoreInstance = FirebaseFirestore.instance;
+    for (var message in messages) {
+      _messages.removeWhere((msg) => msg.id == message.id);
+      firestoreInstance.collection('messages').doc(message.id).delete();
+    }
+    notifyListeners();
+  }
+
   Future<void> createAndUpdateChats() async {
     var currentUserId = FirebaseAuth.instance.currentUser!.uid;
+    _chats.clear();
     for (var message in messages) {
       var chatIndex = _chats.indexWhere((chat) =>
           (chat.receiver.id == message.receiverId ||

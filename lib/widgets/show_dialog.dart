@@ -2,18 +2,19 @@ import 'package:flutter/material.dart';
 
 Future<void> showCustomDialog(BuildContext context,
     {String? title, String? content, required bool showActionButton}) async {
+  var mediaQuery = MediaQuery.of(context);
   await showDialog(
     context: context,
     builder: (context) => Dialog(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 25),
-        width: MediaQuery.of(context).size.width * .8,
-        height: MediaQuery.of(context).size.height * .4,
+        width: mediaQuery.size.width * .8,
+        height: mediaQuery.size.height * .4,
         child: Column(
           mainAxisAlignment: title != null
               ? MainAxisAlignment.spaceBetween
               : showActionButton
-                  ? MainAxisAlignment.spaceBetween
+                  ? MainAxisAlignment.spaceEvenly
                   : MainAxisAlignment.center,
           children: [
             if (title != null)
@@ -25,7 +26,8 @@ Future<void> showCustomDialog(BuildContext context,
             if (content != null)
               Text(
                 content,
-                textAlign: title != null ? null : TextAlign.center,
+                // textAlign: title != null ? null : TextAlign.center,
+                textAlign: TextAlign.center,
                 style: title != null
                     ? Theme.of(context).textTheme.bodyLarge
                     : Theme.of(context).textTheme.titleLarge,

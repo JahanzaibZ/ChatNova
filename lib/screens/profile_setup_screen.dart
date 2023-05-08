@@ -41,21 +41,15 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       var authProvider = Provider.of<AuthProvider>(context, listen: false);
       var authInstance = FirebaseAuth.instance;
       var isValid = _formKey.currentState!.validate();
-      var scaffoldMessener = ScaffoldMessenger.of(context);
       if (isValid) {
         setState(() {
           _isLoading = true;
         });
-        if (_editProfile) {
-          scaffoldMessener
-              .showSnackBar(const SnackBar(content: Text('Saving Profile...')));
-        } else {
-          showCustomDialog(
-            context,
-            content: 'Loading...',
-            showActionButton: false,
-          );
-        }
+        showCustomDialog(
+          context,
+          content: _editProfile ? 'Saving Profile...' : 'Loading...',
+          showActionButton: false,
+        );
         _formKey.currentState!.save();
         profileProvider.setUserInfo = _user.copyWith(
           emailAddress: authInstance.currentUser!.email,
@@ -68,16 +62,20 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         if (!_editProfile) {
           await authProvider.isNewUser(false);
         }
-        if (mounted && _editProfile) {
-          scaffoldMessener.hideCurrentSnackBar();
-          setState(() {
-            _isLoading = false;
-          });
-          scaffoldMessener
-              .showSnackBar(const SnackBar(content: Text('Profile Saved!')));
-        } else if (mounted) {
+        if (mounted && !_editProfile) {
           Navigator.of(context).popUntil((route) => route.isFirst);
+        } else if (mounted && _editProfile) {
+          Navigator.of(context).pop();
+          await showCustomDialog(
+            context,
+            title: 'Profile Saved!',
+            content: 'Your profile information has been updated.',
+            showActionButton: true,
+          );
         }
+        setState(() {
+          _isLoading = false;
+        });
       }
     } catch (error) {
       Navigator.of(context).pop();
@@ -148,8 +146,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     );
     if (imageSource != null) {
       var pickedImage = await ImagePicker().pickImage(
-        maxHeight: 128,
-        maxWidth: 128,
+        maxHeight: 256,
+        maxWidth: 256,
         source: imageSource,
         preferredCameraDevice: CameraDevice.front,
       );
