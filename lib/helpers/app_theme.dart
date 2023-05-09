@@ -84,7 +84,7 @@ ThemeData darkTheme() {
 ColorScheme lightColorScheme() {
   return const ColorScheme(
       brightness: Brightness.light,
-      primary: Color.fromARGB(255, 95, 90, 230),
+      primary: Color.fromARGB(255, 110, 80, 210),
       onPrimary: Colors.white,
       secondary: Colors.orange,
       onSecondary: Colors.white,
@@ -99,8 +99,8 @@ ColorScheme lightColorScheme() {
 ColorScheme darkColorScheme() {
   return const ColorScheme(
     brightness: Brightness.dark,
-    // primary: Color.fromARGB(255, 115, 110, 235),
-    primary: Color.fromARGB(255, 95, 90, 230),
+    // primary: Color.fromARGB(255, 110, 80, 210),
+    primary: Color.fromARGB(255, 120, 100, 220),
     onPrimary: Colors.white,
     secondary: Colors.orange,
     onSecondary: Colors.white,

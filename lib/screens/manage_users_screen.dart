@@ -59,6 +59,13 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
           textScaleFactor: 1.25,
         ),
         centerTitle: true,
+        actions: [
+          if (!_manageBlock)
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.add),
+            ),
+        ],
       ),
       body: ListView.builder(
         itemCount: users.length,

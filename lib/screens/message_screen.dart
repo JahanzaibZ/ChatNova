@@ -108,10 +108,11 @@ class _MessageScreenState extends State<MessageScreen> {
           actions: [
             if (_messagesToBeDeleted.isNotEmpty)
               IconButton(
-                onPressed: () {
-                  Provider.of<UserDataProvider>(context, listen: false)
-                      .deleteMessages(_messagesToBeDeleted, currentUserId);
+                onPressed: () async {
+                  final messagesToBeDeleted = [..._messagesToBeDeleted];
                   _messagesToBeDeleted.clear();
+                  await Provider.of<UserDataProvider>(context, listen: false)
+                      .deleteMessages(messagesToBeDeleted, currentUserId);
                 },
                 icon: const Icon(Icons.delete),
               )
@@ -130,10 +131,18 @@ class _MessageScreenState extends State<MessageScreen> {
                         reverse: true,
                         itemCount: messages.length,
                         itemBuilder: (context, index) {
+                          var dayDifference = 0;
+                          if (index != (messages.length - 1)) {
+                            dayDifference = (messages[index].timeStamp.day -
+                                messages[index + 1].timeStamp.day);
+                          }
+                          // debugPrint('index: $index, $dayDifference');
                           return MessageBubble(
+                            key: ValueKey(messages[index].id),
                             messagesToBeDelete: _queryMessagesToBeDeleted,
                             message: messages[index],
                             activeUserId: currentUserId,
+                            dayDifference: dayDifference,
                           );
                         },
                       ),
