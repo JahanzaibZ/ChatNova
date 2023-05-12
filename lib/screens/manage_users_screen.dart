@@ -38,10 +38,67 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
     });
   }
 
+  Future<void> showAddDialog() {
+    final deviceSize = MediaQuery.of(context).size;
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return SimpleDialog(
+          children: [
+            dialogMenuItem(
+              title: 'Add using Email Address',
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: deviceSize.width * .20,
+                  child: const Divider(),
+                ),
+                SizedBox(width: deviceSize.width * .05),
+                const Text('or'),
+                SizedBox(width: deviceSize.width * .05),
+                SizedBox(
+                  width: deviceSize.width * .20,
+                  child: const Divider(),
+                ),
+              ],
+            ),
+            dialogMenuItem(
+              title: 'Import From Contacts',
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget dialogMenuItem({
+    required String title,
+    required VoidCallback onPressed,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+      child: InkWell(
+        splashFactory: NoSplash.splashFactory,
+        highlightColor: Colors.transparent,
+        onTap: onPressed,
+        child: SizedBox(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [Text(title)],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     _manageBlock = ModalRoute.of(context)?.settings.arguments as bool;
-    var userDataProvider = Provider.of<UserDataProvider>(context);
+    final userDataProvider = Provider.of<UserDataProvider>(context);
     var users = _manageBlock
         ? userDataProvider.userBlocks
         : userDataProvider.userFriends;
@@ -62,7 +119,9 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
         actions: [
           if (!_manageBlock)
             IconButton(
-              onPressed: () {},
+              onPressed: () async {
+                await showAddDialog();
+              },
               icon: const Icon(Icons.add),
             ),
         ],

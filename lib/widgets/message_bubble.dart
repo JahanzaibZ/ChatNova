@@ -59,7 +59,7 @@ class _MessageBubbleState extends State<MessageBubble> {
         widget.messagesToBeDelete(checkIfEmpty: true) ? false : _isSelected;
     return Column(
       children: [
-        // _showDate(),
+        if (widget.dayDifference != -1) _showDate(),
         InkWell(
           child: InkWell(
             splashFactory: NoSplash.splashFactory,

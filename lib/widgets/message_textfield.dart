@@ -65,14 +65,14 @@ class _MessageTextfieldState extends State<MessageTextfield> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                onPressed: _messageTextEditingController.text.isEmpty
+                onPressed: _messageTextEditingController.text.trim().isEmpty
                     ? null
                     : () {
                         widget.sendMessage(
                           context,
                           Message(
                             id: "NO_ID",
-                            text: _messageTextEditingController.text,
+                            text: _messageTextEditingController.text.trim(),
                             timeStamp: DateTime.now(),
                             senderId: widget.senderId,
                             receiverId: widget.recieverId,

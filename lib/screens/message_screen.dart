@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/app_user.dart';
 import '../models/message.dart';
+import '../helpers/day_diffrence.dart';
 import '../screens/profile_screen.dart';
 import '../widgets/message_textfield.dart';
 import '../widgets/message_bubble.dart';
@@ -117,6 +118,14 @@ class _MessageScreenState extends State<MessageScreen> {
                 icon: const Icon(Icons.delete),
               )
           ],
+          leading: _messagesToBeDeleted.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.cancel_rounded),
+                  onPressed: () => setState(() {
+                    _messagesToBeDeleted.clear();
+                  }),
+                )
+              : null,
         ),
         body: SingleChildScrollView(
             child: SizedBox(
@@ -131,12 +140,28 @@ class _MessageScreenState extends State<MessageScreen> {
                         reverse: true,
                         itemCount: messages.length,
                         itemBuilder: (context, index) {
-                          var dayDifference = 0;
-                          if (index != (messages.length - 1)) {
-                            dayDifference = (messages[index].timeStamp.day -
-                                messages[index + 1].timeStamp.day);
+                          final today = DateTime.now();
+                          var dayDifference = daysBetweenDates(
+                            messages[index].timeStamp.year,
+                            messages[index].timeStamp.month,
+                            messages[index].timeStamp.day,
+                            today.year,
+                            today.month,
+                            today.day,
+                          );
+                          if ((index + 1) < messages.length) {
+                            final messageDateDiffrence = daysBetweenDates(
+                              messages[index].timeStamp.year,
+                              messages[index].timeStamp.month,
+                              messages[index].timeStamp.day,
+                              messages[index + 1].timeStamp.year,
+                              messages[index + 1].timeStamp.month,
+                              messages[index + 1].timeStamp.day,
+                            );
+                            if (messageDateDiffrence == 0) {
+                              dayDifference = -1;
+                            }
                           }
-                          // debugPrint('index: $index, $dayDifference');
                           return MessageBubble(
                             key: ValueKey(messages[index].id),
                             messagesToBeDelete: _queryMessagesToBeDeleted,

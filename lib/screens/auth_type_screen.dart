@@ -89,9 +89,9 @@ class AuthTypeScreen extends StatelessWidget {
                     ),
                     onPressed: () => navigateToScreen(
                         context, AuthType.signInWithEmailAddress),
-                    child: Row(
+                    child: const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: const [
+                      children: [
                         Icon(Icons.email),
                         Text('Continue with email address'),
                       ],
