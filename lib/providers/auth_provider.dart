@@ -64,14 +64,18 @@ class AuthProvider with ChangeNotifier {
       var authInstance = FirebaseAuth.instance;
       var firestoreInstance = FirebaseFirestore.instance
           .collection('users')
-          .doc(authInstance.currentUser!.uid)
-          .collection('data')
-          .doc('other');
+          .doc(authInstance.currentUser!.uid);
       if (setKey == true) {
-        await firestoreInstance.set({'isNewUser': setKey});
+        await firestoreInstance.set(
+          {'isNewUser': setKey},
+          SetOptions(merge: true),
+        );
         notifyListeners();
       } else if (setKey == false) {
-        await firestoreInstance.set({'isNewUser': setKey});
+        await firestoreInstance.set(
+          {'isNewUser': setKey},
+          SetOptions(merge: true),
+        );
         notifyListeners();
       } else {
         var snapshot = await firestoreInstance.get();

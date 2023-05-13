@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 import '../models/app_user.dart';
 import '../providers/user_data_provider.dart';
 import '../providers/auth_provider.dart';
-import '../widgets/show_dialog.dart';
+import '../widgets/custom_dialog.dart';
 import '../helpers/disabled_focus_node.dart';
 
 class ProfileSetupScreen extends StatefulWidget {

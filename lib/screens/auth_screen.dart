@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 
 import './opt_screen.dart';
-import '../widgets/show_dialog.dart';
+import '../widgets/custom_dialog.dart';
 import '../providers/auth_provider.dart';
 import '../helpers/auth_type.dart';
 import '../helpers/auth_exception.dart';

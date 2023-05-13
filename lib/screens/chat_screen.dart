@@ -1,3 +1,4 @@
+import 'package:chatnova/screens/new_chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -58,54 +59,67 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ),
         Expanded(
-          child: ListView.builder(
-            itemCount: filteredChats.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage:
-                        const AssetImage('assets/images/default_profile.png'),
-                    foregroundImage: filteredChats[index]
-                                .receiver
-                                .profilePictureURL !=
-                            null
-                        ? NetworkImage(
-                            filteredChats[index].receiver.profilePictureURL!)
-                        : null,
-                    radius: 30,
+          child: filteredChats.isEmpty
+              ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  const Text(
+                    'Oops! No chats were found.',
+                    textAlign: TextAlign.center,
                   ),
-                  title: Text(filteredChats[index].receiver.name),
-                  subtitle: Text(
-                    filteredChats[index].lastMessageText,
-                    style: TextStyle(
-                        color: Theme.of(context)
-                            .textTheme
-                            .bodySmall!
-                            .color!
-                            .withOpacity(.5)),
-                  ),
-                  trailing: Text(
-                    DateFormat.jm()
-                        .format(filteredChats[index].lastMessageTimeStamp),
-                    style: TextStyle(
-                        color: Theme.of(context)
-                            .textTheme
-                            .bodySmall!
-                            .color!
-                            .withOpacity(.5)),
-                  ),
-                  onTap: () async {
-                    FocusScope.of(context).unfocus();
-                    await Navigator.of(context).pushNamed(
-                      MessageScreen.routeName,
-                      arguments: filteredChats[index].receiver,
-                    );
-                    setState(() {
-                      searchFieldTextEditingController.clear();
-                    });
-                  });
-            },
-          ),
+                  TextButton(
+                      style: TextButton.styleFrom(
+                          splashFactory: NoSplash.splashFactory),
+                      onPressed: () => Navigator.of(context)
+                          .pushNamed(NewChatScreen.routeName),
+                      child: const Text('Start a new chat!'))
+                ])
+              : ListView.builder(
+                  itemCount: filteredChats.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: const AssetImage(
+                              'assets/images/default_profile.png'),
+                          foregroundImage:
+                              filteredChats[index].receiver.profilePictureURL !=
+                                      null
+                                  ? NetworkImage(filteredChats[index]
+                                      .receiver
+                                      .profilePictureURL!)
+                                  : null,
+                          radius: 30,
+                        ),
+                        title: Text(filteredChats[index].receiver.name),
+                        subtitle: Text(
+                          filteredChats[index].lastMessageText,
+                          style: TextStyle(
+                              color: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall!
+                                  .color!
+                                  .withOpacity(.5)),
+                        ),
+                        trailing: Text(
+                          DateFormat.jm().format(
+                              filteredChats[index].lastMessageTimeStamp),
+                          style: TextStyle(
+                              color: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall!
+                                  .color!
+                                  .withOpacity(.5)),
+                        ),
+                        onTap: () async {
+                          FocusScope.of(context).unfocus();
+                          await Navigator.of(context).pushNamed(
+                            MessageScreen.routeName,
+                            arguments: filteredChats[index].receiver,
+                          );
+                          setState(() {
+                            searchFieldTextEditingController.clear();
+                          });
+                        });
+                  },
+                ),
         ),
       ],
     );

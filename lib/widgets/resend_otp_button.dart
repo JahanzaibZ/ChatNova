@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../providers/auth_provider.dart';
-import './show_dialog.dart';
+import 'custom_dialog.dart';
 
 class ResendOtpButton extends StatefulWidget {
   final bool isAuthenticated;

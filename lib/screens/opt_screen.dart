@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
 import '../widgets/resend_otp_button.dart';
-import '../widgets/show_dialog.dart';
+import '../widgets/custom_dialog.dart';
 import '../helpers/auth_exception.dart';
 
 class OtpScreen extends StatefulWidget {

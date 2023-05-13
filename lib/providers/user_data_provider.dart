@@ -82,9 +82,12 @@ class UserDataProvider with ChangeNotifier {
   Future<void> addOrRemoveUserFriendsAndBlocks({
     bool remove = false,
     bool block = false,
+    bool delayed = true,
     required AppUser user,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 100));
+    if (delayed) {
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
     if (block) {
       if (remove) {
         _userBlocks.removeWhere((block) => block.id == user.id);
@@ -113,19 +116,20 @@ class UserDataProvider with ChangeNotifier {
       final firestoreInstance = FirebaseFirestore.instance;
       final firestoreUserPath = firestoreInstance
           .collection('users')
-          .doc(authInstance.currentUser!.uid)
-          .collection('data')
-          .doc('profile');
+          .doc(authInstance.currentUser!.uid);
       if (!onlyFetch) {
-        await firestoreUserPath.set({
-          'name': _user.name,
-          'emailAddress': _user.emailAddress,
-          'phoneNumber': _user.phoneNumber,
-          'profilePictureURL': _user.profilePictureURL,
-          'dateOfBirth': Timestamp.fromDate(_user.dateOfBirth),
-          'interests': _user.interests,
-          'isPro': _user.isPro,
-        });
+        await firestoreUserPath.set(
+          {
+            'name': _user.name,
+            'emailAddress': _user.emailAddress,
+            'phoneNumber': _user.phoneNumber,
+            'profilePictureURL': _user.profilePictureURL,
+            'dateOfBirth': Timestamp.fromDate(_user.dateOfBirth),
+            'interests': _user.interests,
+            'isPro': _user.isPro,
+          },
+          SetOptions(merge: true),
+        );
       }
       final documentSnapshot = await firestoreUserPath.get();
       final snapshotData = documentSnapshot.data();
@@ -154,16 +158,18 @@ class UserDataProvider with ChangeNotifier {
       final firestoreInstance = FirebaseFirestore.instance;
       final firestoreFriendsPath = firestoreInstance
           .collection('users')
-          .doc(authInstance.currentUser!.uid)
-          .collection('data')
-          .doc('other');
+          .doc(authInstance.currentUser!.uid);
       if (!onlyFetch) {
         await firestoreFriendsPath.set(
           {
-            'friends': _userFriends.map((friend) => friend.id).toList(),
-            'blocks': _userBlocks.map((block) => block.id).toList(),
-            'isNewUser': false,
+            'friends': _userFriends.isNotEmpty
+                ? _userFriends.map((friend) => friend.id).toList()
+                : null,
+            'blocks': _userBlocks.isNotEmpty
+                ? _userBlocks.map((block) => block.id).toList()
+                : null,
           },
+          SetOptions(merge: true),
         );
       }
       var documentSnapshot = await firestoreFriendsPath.get();
@@ -172,12 +178,8 @@ class UserDataProvider with ChangeNotifier {
         if (snapshotData['friends'] != null) {
           _userFriends.clear();
           for (String friendId in snapshotData['friends']) {
-            documentSnapshot = await firestoreInstance
-                .collection('users')
-                .doc(friendId)
-                .collection('data')
-                .doc('profile')
-                .get();
+            documentSnapshot =
+                await firestoreInstance.collection('users').doc(friendId).get();
             final documentData = documentSnapshot.data();
             if (documentData != null) {
               _userFriends.add(AppUser(
@@ -197,12 +199,8 @@ class UserDataProvider with ChangeNotifier {
         if (snapshotData['blocks'] != null) {
           _userBlocks.clear();
           for (String blockId in snapshotData['blocks']) {
-            documentSnapshot = await firestoreInstance
-                .collection('users')
-                .doc(blockId)
-                .collection('data')
-                .doc('profile')
-                .get();
+            documentSnapshot =
+                await firestoreInstance.collection('users').doc(blockId).get();
             final documentData = documentSnapshot.data();
             if (documentData != null) {
               _userBlocks.add(
@@ -228,15 +226,56 @@ class UserDataProvider with ChangeNotifier {
     }
   }
 
-  Future<AppUser> fetchUnknownUserInfo(String userId) async {
+  Future<AppUser?> fetchUnknownUserInfoByPhone(String phoneNumber) async {
     final firestoreInstance = FirebaseFirestore.instance;
-    final documentData = (await firestoreInstance
-            .collection('users')
-            .doc(userId)
-            .collection('data')
-            .doc('profile')
-            .get())
-        .data();
+    final documents = (await firestoreInstance.collection('users').get()).docs;
+    debugPrint('documents: $documents');
+    for (final doc in documents) {
+      final docData = doc.data();
+      if (docData['phoneNumber'] != null &&
+          (docData['phoneNumber'] as String)
+              .replaceAll(RegExp(r'^\++'), '')
+              .contains(phoneNumber.replaceAll(RegExp(r'^0+|^\++|\s+'), ''))) {
+        return AppUser(
+          id: doc.id,
+          name: docData['name'],
+          emailAddress: docData['emailAddress'],
+          phoneNumber: docData['phoneNumber'],
+          profilePictureURL: docData['profilePictureURL'],
+          dateOfBirth: (docData['dateOfBirth'] as Timestamp).toDate(),
+          interests: <String>[...docData['interests']],
+          isPro: docData['isPro'],
+        );
+      }
+    }
+    return null;
+  }
+
+  Future<AppUser?> fetchUnknownUserInfoByEmail(String email) async {
+    final firestoreInstance = FirebaseFirestore.instance;
+    final documents = (await firestoreInstance.collection('users').get()).docs;
+    for (final doc in documents) {
+      final docData = doc.data();
+      if (docData['emailAddress'] == email) {
+        return AppUser(
+          id: doc.id,
+          name: docData['name'],
+          emailAddress: docData['emailAddress'],
+          phoneNumber: docData['phoneNumber'],
+          profilePictureURL: docData['profilePictureURL'],
+          dateOfBirth: (docData['dateOfBirth'] as Timestamp).toDate(),
+          interests: <String>[...docData['interests']],
+          isPro: docData['isPro'],
+        );
+      }
+    }
+    return null;
+  }
+
+  Future<AppUser> fetchUnknownUserInfoById(String userId) async {
+    final firestoreInstance = FirebaseFirestore.instance;
+    final documentData =
+        (await firestoreInstance.collection('users').doc(userId).get()).data();
     return AppUser(
       id: userId,
       name: documentData!['name'],
@@ -249,7 +288,7 @@ class UserDataProvider with ChangeNotifier {
     );
   }
 
-  AppUser? fetchUnknownUserFromFriendsList(String userId) {
+  AppUser? fetchUnknownUserFromFriendsListById(String userId) {
     for (final friend in userFriends) {
       if (friend.id == userId) {
         return friend;
@@ -280,8 +319,6 @@ class UserDataProvider with ChangeNotifier {
         _messageDocuments = documentSnapshot.docs;
         if (_messageDocuments.isNotEmpty) {
           _messages.clear();
-
-          _chats.clear();
           var messageAdded = false;
           for (final messageDocument in _messageDocuments) {
             final message = messageDocument.data();
@@ -302,7 +339,6 @@ class UserDataProvider with ChangeNotifier {
           }
           if (messageAdded) {
             await createAndUpdateChats();
-            notifyListeners();
           }
         }
       },
@@ -323,11 +359,15 @@ class UserDataProvider with ChangeNotifier {
       }
     }
     notifyListeners();
+    if (_messages.isEmpty) {
+      createAndUpdateChats();
+    }
     await batch.commit();
   }
 
   Future<void> createAndUpdateChats() async {
     final currentUserId = FirebaseAuth.instance.currentUser!.uid;
+    _chats.clear();
     for (final message in messages) {
       final chatIndex = _chats.indexWhere((chat) =>
           (chat.receiver.id == message.receiverId ||
@@ -343,12 +383,12 @@ class UserDataProvider with ChangeNotifier {
       }
 
       if (chatIndex == -1) {
-        final chatReceiver = fetchUnknownUserFromFriendsList(
+        final chatReceiver = fetchUnknownUserFromFriendsListById(
               message.senderId == currentUserId
                   ? message.receiverId
                   : message.senderId,
             ) ??
-            await fetchUnknownUserInfo(
+            await fetchUnknownUserInfoById(
               message.senderId == currentUserId
                   ? message.receiverId
                   : message.senderId,
@@ -360,5 +400,6 @@ class UserDataProvider with ChangeNotifier {
         ));
       }
     }
+    notifyListeners();
   }
 }

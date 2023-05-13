@@ -6,7 +6,7 @@ class LiveChatScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: Text('LiveChatScreen'),
+      child: Text('Under Development!'),
     );
   }
 }
