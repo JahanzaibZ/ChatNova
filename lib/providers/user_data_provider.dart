@@ -315,31 +315,29 @@ class UserDataProvider with ChangeNotifier {
         .snapshots();
     return messageStream.listen(
       (documentSnapshot) async {
+        var updatedMessages = <Message>[];
         _messageDocuments.clear();
         _messageDocuments = documentSnapshot.docs;
-        if (_messageDocuments.isNotEmpty) {
+        for (final messageDocument in _messageDocuments) {
+          final message = messageDocument.data();
+          final userId = FirebaseAuth.instance.currentUser!.uid;
+          if (message['receiverId'] == userId ||
+              message['senderId'] == userId) {
+            updatedMessages.add(Message(
+              id: messageDocument.id,
+              text: message['text'],
+              receiverId: message['receiverId'].toString(),
+              senderId: message['senderId'],
+              timeStamp: (message['timeStamp'] as Timestamp).toDate(),
+            ));
+          }
+        }
+        if (_messages.length != updatedMessages.length) {
           _messages.clear();
-          var messageAdded = false;
-          for (final messageDocument in _messageDocuments) {
-            final message = messageDocument.data();
-            final userId = FirebaseAuth.instance.currentUser!.uid;
-            if (message['receiverId'] == userId ||
-                message['senderId'] == userId) {
-              _messages.add(Message(
-                id: messageDocument.id,
-                text: message['text'],
-                receiverId: message['receiverId'].toString(),
-                senderId: message['senderId'],
-                timeStamp: (message['timeStamp'] as Timestamp).toDate(),
-              ));
-              if (!messageAdded) {
-                messageAdded = true;
-              }
-            }
+          for (var message in updatedMessages) {
+            _messages.add(message);
           }
-          if (messageAdded) {
-            await createAndUpdateChats();
-          }
+          await createAndUpdateChats();
         }
       },
       onError: (error) => debugPrint(' Stream Error Encountered!'),

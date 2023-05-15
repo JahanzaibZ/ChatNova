@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import '../screens/profile_setup_screen.dart';
 import '../screens/manage_users_screen.dart';
@@ -11,7 +10,6 @@ class MoreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var authInstance = FirebaseAuth.instance;
     var user = Provider.of<UserDataProvider>(context).user;
     return ListView(
       children: [
@@ -26,9 +24,7 @@ class MoreScreen extends StatelessWidget {
           ),
           title: Text(user.name),
           subtitle: Text(
-            authInstance.currentUser?.phoneNumber ??
-                authInstance.currentUser?.email ??
-                'Unknown',
+            user.phoneNumber ?? user.emailAddress ?? 'Unknown',
           ),
           trailing: const Icon(Icons.keyboard_arrow_right),
           onTap: () => Navigator.of(context).pushNamed(
