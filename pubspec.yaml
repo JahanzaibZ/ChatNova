@@ -22,6 +22,8 @@ dependencies:
   shared_preferences: ^2.1.0
   sqflite: ^2.2.7
   flutter_contacts: ^1.1.6
+  flutter_paypal: ^0.0.8
+  firebase_database: ^10.2.0
 
 dev_dependencies:
   flutter_test:

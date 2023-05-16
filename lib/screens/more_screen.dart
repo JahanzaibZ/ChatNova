@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../screens/profile_setup_screen.dart';
 import '../screens/manage_users_screen.dart';
 import '../providers/user_data_provider.dart';
+import '../widgets/paypal_payment.dart';
 
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
@@ -32,13 +33,16 @@ class MoreScreen extends StatelessWidget {
             arguments: true,
           ),
         ),
-        const ListTile(
-          leading: Icon(
-            Icons.account_circle_outlined,
+        ListTile(
+          leading: const Icon(
+            Icons.add_card_rounded,
             // size: 30,
           ),
-          title: Text('Account'),
-          trailing: Icon(Icons.keyboard_arrow_right),
+          title: const Text('Upgrade to Pro Account'),
+          trailing: const Icon(Icons.keyboard_arrow_right),
+          onTap: () {
+            paypalPaymentDialog(context);
+          },
         ),
         ListTile(
           leading: const Icon(
