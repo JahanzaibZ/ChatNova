@@ -21,7 +21,8 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   var currentIndex = 1;
-  late StreamSubscription streamSubscription;
+  late StreamSubscription messageStreamSubscription;
+  late StreamSubscription statusStreamSubscription;
 
   @override
   void initState() {
@@ -31,14 +32,19 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void dispose() {
-    streamSubscription.cancel();
+    messageStreamSubscription.cancel();
+    statusStreamSubscription.cancel();
     super.dispose();
   }
 
   Future<void> startSubscription() async {
-    streamSubscription =
-        await Provider.of<UserDataProvider>(context, listen: false)
-            .listenAndReadMessasgesFromFirestore();
+    final userDataProvider =
+        Provider.of<UserDataProvider>(context, listen: false);
+    await userDataProvider.setUserStatus();
+    messageStreamSubscription =
+        await userDataProvider.listenAndReadMessasgesFromFirestore();
+    statusStreamSubscription =
+        await userDataProvider.listenAndReadUserStatusFromDatabase();
   }
 
   PreferredSizeWidget _scaffoldAppBar() {

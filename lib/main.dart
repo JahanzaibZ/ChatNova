@@ -14,6 +14,7 @@ import './screens/privacy_policy_screen.dart';
 import './screens/message_screen.dart';
 import './screens/profile_screen.dart';
 import './screens/manage_users_screen.dart';
+import './screens/live_chat_message_screen.dart';
 import './helpers/app_theme.dart';
 import './providers/auth_provider.dart';
 import './providers/user_data_provider.dart';
@@ -96,6 +97,8 @@ class MainApp extends StatelessWidget {
           MessageScreen.routeName: (context) => const MessageScreen(),
           ProfileScreen.routeName: (context) => const ProfileScreen(),
           ManageUsersScreen.routeName: (context) => const ManageUsersScreen(),
+          LiveChatMessageScreen.routeName: (context) =>
+              const LiveChatMessageScreen(),
         },
       ),
     );

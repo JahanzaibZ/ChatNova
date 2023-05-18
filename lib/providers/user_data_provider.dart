@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/app_user.dart';
@@ -11,21 +12,38 @@ import '../models/chat.dart';
 import '../models/message.dart';
 
 class UserDataProvider with ChangeNotifier {
+  var _liveChatUser = AppUser(
+    id: 'NO_ID',
+    name: 'NO_NAME',
+    dateOfBirth: DateTime.now(),
+    interests: ['NO_INTERESTS'],
+  );
   var _user = AppUser(
     id: 'NO_ID',
     name: 'NO_NAME',
     dateOfBirth: DateTime.now(),
     interests: ['NO_INTERESTS'],
   );
+  final Map<String, dynamic> _friendsStatus = {};
   final List<AppUser> _userFriends = [];
   final List<AppUser> _userBlocks = [];
   final List<Chat> _chats = [];
   final List<Message> _messages = [];
+  final List<Message> _liveChatMessages = [];
 
   var _messageDocuments = <QueryDocumentSnapshot<Map<String, dynamic>>>[];
+  var _liveMessageDocuments = <QueryDocumentSnapshot<Map<String, dynamic>>>[];
+
+  AppUser get liveChatUser {
+    return _liveChatUser;
+  }
 
   AppUser get user {
     return _user;
+  }
+
+  Map<String, dynamic> get friendsStatus {
+    return {..._friendsStatus};
   }
 
   List<AppUser> get userFriends {
@@ -42,6 +60,10 @@ class UserDataProvider with ChangeNotifier {
 
   List<Message> get messages {
     return [..._messages];
+  }
+
+  List<Message> get liveChatMessages {
+    return [..._liveChatMessages];
   }
 
   set setUserInfo(AppUser user) {
@@ -77,6 +99,27 @@ class UserDataProvider with ChangeNotifier {
     } catch (error) {
       rethrow;
     }
+  }
+
+  Future<StreamSubscription> listenAndReadUserStatusFromDatabase() async {
+    final databaseRef = FirebaseDatabase.instance.ref('userStatus');
+    return databaseRef.onValue.listen((event) {
+      final eventSnapshotData = event.snapshot.value as Map<dynamic, dynamic>;
+      _friendsStatus.clear();
+      eventSnapshotData.forEach((key, value) {
+        for (final friend in _userFriends) {
+          if (friend.id == key) {
+            _friendsStatus.addAll({key: value});
+          }
+        }
+      });
+    });
+  }
+
+  Future<void> setUserStatus() async {
+    final databaseRef = FirebaseDatabase.instance.ref('userStatus');
+    await databaseRef.onDisconnect().update({_user.id: null});
+    await databaseRef.update({_user.id: true});
   }
 
   Future<void> addOrRemoveUserFriendsAndBlocks({
@@ -229,7 +272,6 @@ class UserDataProvider with ChangeNotifier {
   Future<AppUser?> fetchUnknownUserInfoByPhone(String phoneNumber) async {
     final firestoreInstance = FirebaseFirestore.instance;
     final documents = (await firestoreInstance.collection('users').get()).docs;
-    debugPrint('documents: $documents');
     for (final doc in documents) {
       final docData = doc.data();
       if (docData['phoneNumber'] != null &&
@@ -340,7 +382,7 @@ class UserDataProvider with ChangeNotifier {
           await createAndUpdateChats();
         }
       },
-      onError: (error) => debugPrint(' Stream Error Encountered!'),
+      onError: (error) => debugPrint('Messages Stream Error Encountered!'),
       cancelOnError: true,
     );
   }
@@ -399,5 +441,133 @@ class UserDataProvider with ChangeNotifier {
       }
     }
     notifyListeners();
+  }
+
+  Future<StreamSubscription> listenAndFetchLiveChatUsersFromDatabase() async {
+    final databaseRef = FirebaseDatabase.instance.ref('liveChatUsers');
+    return databaseRef.onValue.listen(
+      (event) {
+        if (event.snapshot.value != null) {
+          final eventSnapshotData =
+              event.snapshot.value as Map<dynamic, dynamic>;
+          if (_liveChatUser.id != 'NO_ID') {
+            if (!eventSnapshotData.containsKey(_liveChatUser.id)) {
+              _liveChatUser = _liveChatUser.copyWith(id: 'NO_ID');
+              notifyListeners();
+            }
+          } else {
+            eventSnapshotData.forEach(
+              (key, value) {
+                for (final interest in (<String>[...value['interests']])) {
+                  if (key != _user.id && _user.interests.contains(interest)) {
+                    _liveChatUser = AppUser(
+                      id: key,
+                      name: value['name'],
+                      emailAddress: value['emailAddress'],
+                      phoneNumber: value['phoneNumber'],
+                      dateOfBirth: DateTime.tryParse(value['dateOfBirth']) ??
+                          DateTime.now(),
+                      profilePictureURL: value['profilePictureURL'],
+                      interests: <String>[...value['interests']],
+                      isPro: value['isPro'],
+                    );
+                    break;
+                  }
+                }
+              },
+            );
+          }
+        }
+      },
+      onError: (error) =>
+          debugPrint(' Live Chat Users Stream Error Encountered!'),
+      cancelOnError: true,
+    );
+  }
+
+  Future<void> setUserLiveChatStatus([bool remove = false]) async {
+    final databaseRef = FirebaseDatabase.instance.ref('liveChatUsers');
+    if (remove) {
+      await databaseRef.update({_user.id: null});
+      return;
+    }
+    await databaseRef.onDisconnect().update({_user.id: null});
+    await databaseRef.update({
+      _user.id: {
+        'name': _user.name,
+        'emailAddress': _user.emailAddress,
+        'phoneNumber': _user.phoneNumber,
+        'dateOfBirth': _user.dateOfBirth.toIso8601String(),
+        'profilePictureURL': _user.profilePictureURL,
+        'interests': _user.interests,
+        'isPro': _user.isPro,
+      }
+    });
+  }
+
+  Future<void> sendLiveMessage(Message message) async {
+    final firstoreInstance = FirebaseFirestore.instance;
+    firstoreInstance.collection('liveMessages').doc().set({
+      'text': message.text,
+      'timeStamp': message.timeStamp,
+      'senderId': message.senderId,
+      'receiverId': message.receiverId,
+    });
+  }
+
+  Future<StreamSubscription> listenAndReadLiveMessasgesFromFirestore(
+      String liveChatUserId) async {
+    final firestoreInstance = FirebaseFirestore.instance;
+    final messageStream = firestoreInstance
+        .collection('liveMessages')
+        .orderBy('timeStamp', descending: true)
+        .snapshots();
+    return messageStream.listen(
+      (documentSnapshot) async {
+        var updatedMessages = <Message>[];
+        _liveMessageDocuments.clear();
+        _liveMessageDocuments = documentSnapshot.docs;
+        for (final messageDocument in _liveMessageDocuments) {
+          final message = messageDocument.data();
+          final userId = FirebaseAuth.instance.currentUser!.uid;
+          if ((message['receiverId'] == userId &&
+                  message['senderId'] == liveChatUserId) ||
+              (message['senderId'] == userId &&
+                  message['receiverId'] == liveChatUserId)) {
+            updatedMessages.add(Message(
+              id: messageDocument.id,
+              text: message['text'],
+              receiverId: message['receiverId'].toString(),
+              senderId: message['senderId'],
+              timeStamp: (message['timeStamp'] as Timestamp).toDate(),
+            ));
+          }
+        }
+        if (_liveChatMessages.length != updatedMessages.length) {
+          _liveChatMessages.clear();
+          for (var message in updatedMessages) {
+            _liveChatMessages.add(message);
+          }
+          notifyListeners();
+        }
+      },
+      onError: (error) =>
+          debugPrint(' Live Chat Messages Stream Error Encountered!'),
+      cancelOnError: true,
+    );
+  }
+
+  Future<void> deleteLiveMessages() async {
+    final batch = FirebaseFirestore.instance.batch();
+    final liveChatMessages = [..._liveChatMessages];
+    for (final message in liveChatMessages) {
+      _liveChatMessages.removeWhere((msg) => msg.id == message.id);
+      for (final messageDocument in _liveMessageDocuments) {
+        if (messageDocument.id == message.id) {
+          batch.delete(messageDocument.reference);
+        }
+      }
+    }
+    await batch.commit();
   }
 }

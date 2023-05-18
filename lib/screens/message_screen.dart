@@ -8,7 +8,7 @@ import '../models/message.dart';
 import '../helpers/day_diffrence.dart';
 import '../screens/profile_screen.dart';
 import '../widgets/message_textfield.dart';
-import '../widgets/message_bubble.dart';
+import '../widgets/message_selection.dart';
 
 class MessageScreen extends StatefulWidget {
   static const routeName = '/message-screen';
@@ -128,58 +128,59 @@ class _MessageScreenState extends State<MessageScreen> {
               : null,
         ),
         body: SingleChildScrollView(
-            child: SizedBox(
-          height: scaffoldHeight,
-          width: mediaQuery.size.width,
-          child: Column(
-            children: [
-              Expanded(
-                child: messages.isEmpty
-                    ? const SizedBox()
-                    : ListView.builder(
-                        reverse: true,
-                        itemCount: messages.length,
-                        itemBuilder: (context, index) {
-                          final today = DateTime.now();
-                          var dayDifference = daysBetweenDates(
-                            messages[index].timeStamp.year,
-                            messages[index].timeStamp.month,
-                            messages[index].timeStamp.day,
-                            today.year,
-                            today.month,
-                            today.day,
-                          );
-                          if ((index + 1) < messages.length) {
-                            final messageDateDiffrence = daysBetweenDates(
+          child: SizedBox(
+            height: scaffoldHeight,
+            width: mediaQuery.size.width,
+            child: Column(
+              children: [
+                Expanded(
+                  child: messages.isEmpty
+                      ? const SizedBox()
+                      : ListView.builder(
+                          reverse: true,
+                          itemCount: messages.length,
+                          itemBuilder: (context, index) {
+                            final today = DateTime.now();
+                            var dayDifference = daysBetweenDates(
                               messages[index].timeStamp.year,
                               messages[index].timeStamp.month,
                               messages[index].timeStamp.day,
-                              messages[index + 1].timeStamp.year,
-                              messages[index + 1].timeStamp.month,
-                              messages[index + 1].timeStamp.day,
+                              today.year,
+                              today.month,
+                              today.day,
                             );
-                            if (messageDateDiffrence == 0) {
-                              dayDifference = -1;
+                            if ((index + 1) < messages.length) {
+                              final messageDateDiffrence = daysBetweenDates(
+                                messages[index].timeStamp.year,
+                                messages[index].timeStamp.month,
+                                messages[index].timeStamp.day,
+                                messages[index + 1].timeStamp.year,
+                                messages[index + 1].timeStamp.month,
+                                messages[index + 1].timeStamp.day,
+                              );
+                              if (messageDateDiffrence == 0) {
+                                dayDifference = -1;
+                              }
                             }
-                          }
-                          return MessageBubble(
-                            key: ValueKey(messages[index].id),
-                            messagesToBeDelete: _queryMessagesToBeDeleted,
-                            message: messages[index],
-                            activeUserId: currentUserId,
-                            dayDifference: dayDifference,
-                          );
-                        },
-                      ),
-              ),
-              MessageTextfield(
-                recieverId: receiver.id,
-                senderId: currentUserId,
-                sendMessage: _sendMessage,
-              ),
-            ],
+                            return MessageSelection(
+                              key: ValueKey(messages[index].id),
+                              messagesToBeDelete: _queryMessagesToBeDeleted,
+                              message: messages[index],
+                              activeUserId: currentUserId,
+                              dayDifference: dayDifference,
+                            );
+                          },
+                        ),
+                ),
+                MessageTextfield(
+                  recieverId: receiver.id,
+                  senderId: currentUserId,
+                  sendMessage: _sendMessage,
+                ),
+              ],
+            ),
           ),
-        )),
+        ),
       ),
     );
   }
