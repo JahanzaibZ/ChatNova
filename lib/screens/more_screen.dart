@@ -4,14 +4,15 @@ import 'package:provider/provider.dart';
 import '../screens/profile_setup_screen.dart';
 import '../screens/manage_users_screen.dart';
 import '../providers/user_data_provider.dart';
-import '../widgets/paypal_payment.dart';
+import '../widgets/manage_subscription_list_tile.dart';
 
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    var user = Provider.of<UserDataProvider>(context).user;
+    final userDataProvider = Provider.of<UserDataProvider>(context);
+    final user = userDataProvider.user;
     return ListView(
       children: [
         ListTile(
@@ -33,17 +34,7 @@ class MoreScreen extends StatelessWidget {
             arguments: true,
           ),
         ),
-        ListTile(
-          leading: const Icon(
-            Icons.add_card_rounded,
-            // size: 30,
-          ),
-          title: const Text('Upgrade to Pro Account'),
-          trailing: const Icon(Icons.keyboard_arrow_right),
-          onTap: () {
-            paypalPaymentDialog(context);
-          },
-        ),
+        const ManageSubscriptionListTile(),
         ListTile(
           leading: const Icon(
             Icons.group_rounded,

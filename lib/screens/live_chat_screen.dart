@@ -11,8 +11,7 @@ class LiveChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userInterests =
-        Provider.of<UserDataProvider>(context, listen: false).user.interests;
+    final user = Provider.of<UserDataProvider>(context).user;
     final deviceSize = MediaQuery.of(context).size;
     return SizedBox(
       width: double.maxFinite,
@@ -30,14 +29,16 @@ class LiveChatScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
             child: Text(
-              userInterests.join('\n'),
+              user.interests.join('\n'),
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 18),
             ),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context)
-                .pushNamed(ProfileSetupScreen.routeName, arguments: true),
+            onPressed: user.isPro
+                ? () => Navigator.of(context)
+                    .pushNamed(ProfileSetupScreen.routeName, arguments: true)
+                : null,
             child: const Text('Edit Interests!'),
           ),
           ElevatedButton(
@@ -47,47 +48,66 @@ class LiveChatScreen extends StatelessWidget {
                 ),
                 fixedSize: Size(deviceSize.width * .4, deviceSize.height * .06),
               ),
-              onPressed: () async {
-                final userDataProvider =
-                    Provider.of<UserDataProvider>(context, listen: false);
-                var liveChatUser = userDataProvider.liveChatUser;
-                showCustomDialog(context,
-                    content: 'Searching for users...', showActionButton: false);
-                await userDataProvider.setUserLiveChatStatus();
-                final liveChatSubscription = await userDataProvider
-                    .listenAndFetchLiveChatUsersFromDatabase();
-                for (var i = 0; i < 6; i++) {
-                  liveChatUser = userDataProvider.liveChatUser;
-                  if (liveChatUser.id == 'NO_ID') {
-                    await Future.delayed(const Duration(seconds: 1));
-                  } else {
-                    break;
-                  }
-                }
-                if (liveChatUser.id == 'NO_ID' && context.mounted) {
-                  liveChatSubscription.cancel();
-                  Navigator.of(context).pop();
-                  showCustomDialog(context,
-                      title: 'User Not Found!',
-                      content:
-                          'No user with matching interets found, please try again later',
-                      showActionButton: true);
-                  userDataProvider.setUserLiveChatStatus(true);
-                } else {
-                  final liveChatMessageSubscription = await userDataProvider
-                      .listenAndReadLiveMessasgesFromFirestore(liveChatUser.id);
-                  if (context.mounted) {
-                    Navigator.of(context).pushReplacementNamed(
-                        LiveChatMessageScreen.routeName,
-                        arguments: {
-                          'liveChatSubscription': liveChatSubscription,
-                          'liveChatMessageSubscription':
-                              liveChatMessageSubscription,
-                        });
-                  }
-                }
-              },
-              child: const Text('Connect!'))
+              onPressed: user.isPro
+                  ? () async {
+                      final userDataProvider =
+                          Provider.of<UserDataProvider>(context, listen: false);
+                      var liveChatUser = userDataProvider.liveChatUser;
+                      showCustomDialog(context,
+                          content: 'Searching for users...',
+                          showActionButton: false);
+                      await userDataProvider.setUserLiveChatStatus();
+                      final liveChatSubscription = await userDataProvider
+                          .listenAndFetchLiveChatUsersFromDatabase();
+                      for (var i = 0; i < 6; i++) {
+                        liveChatUser = userDataProvider.liveChatUser;
+                        if (liveChatUser.id == 'NO_ID') {
+                          await Future.delayed(const Duration(seconds: 1));
+                        } else {
+                          break;
+                        }
+                      }
+                      if (liveChatUser.id == 'NO_ID' && context.mounted) {
+                        liveChatSubscription.cancel();
+                        Navigator.of(context).pop();
+                        showCustomDialog(context,
+                            title: 'User Not Found!',
+                            content:
+                                'No user with matching interests found, please try again later',
+                            showActionButton: true);
+                        userDataProvider.setUserLiveChatStatus(true);
+                      } else {
+                        final liveChatMessageSubscription =
+                            await userDataProvider
+                                .listenAndReadLiveMessasgesFromFirestore(
+                                    liveChatUser.id);
+                        if (context.mounted) {
+                          Navigator.of(context).pushReplacementNamed(
+                              LiveChatMessageScreen.routeName,
+                              arguments: {
+                                'liveChatSubscription': liveChatSubscription,
+                                'liveChatMessageSubscription':
+                                    liveChatMessageSubscription,
+                              });
+                        }
+                      }
+                    }
+                  : null,
+              child: const Text('Connect!')),
+          if (!user.isPro)
+            const Padding(
+              padding: EdgeInsets.only(top: 10),
+              child: Icon(Icons.error),
+            ),
+          if (!user.isPro)
+            SizedBox(
+              width: deviceSize.width * .6,
+              child: const Text(
+                'You need to have pro subscription to use this feature!',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12),
+              ),
+            )
         ],
       ),
     );

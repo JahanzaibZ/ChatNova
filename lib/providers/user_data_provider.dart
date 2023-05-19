@@ -138,6 +138,10 @@ class UserDataProvider with ChangeNotifier {
         _userBlocks.add(user);
         _userFriends.removeWhere((friend) => friend.id == user.id);
       }
+      final ref = FirebaseFirestore.instance
+          .collection('messages')
+          .doc('DEFAULT_MESSAGE');
+      await ref.set({'timeStamp': DateTime.now()}, SetOptions(merge: true));
     } else {
       if (remove) {
         _userFriends.removeWhere(
@@ -362,9 +366,12 @@ class UserDataProvider with ChangeNotifier {
         _messageDocuments = documentSnapshot.docs;
         for (final messageDocument in _messageDocuments) {
           final message = messageDocument.data();
-          final userId = FirebaseAuth.instance.currentUser!.uid;
-          if (message['receiverId'] == userId ||
-              message['senderId'] == userId) {
+          if ((message['receiverId'] == _user.id &&
+                  _userBlocks
+                      .every((user) => user.id != message['senderId'])) ||
+              (message['senderId'] == _user.id &&
+                  _userBlocks
+                      .every((user) => user.id != message['receiverId']))) {
             updatedMessages.add(Message(
               id: messageDocument.id,
               text: message['text'],
@@ -391,7 +398,6 @@ class UserDataProvider with ChangeNotifier {
       List<Message> messages, String currentUserid) async {
     final batch = FirebaseFirestore.instance.batch();
     for (final message in messages) {
-      _messages.removeWhere((msg) => msg.id == message.id);
       for (final messageDocument in _messageDocuments) {
         if (messageDocument.id == message.id) {
           batch.delete(messageDocument.reference);
@@ -406,9 +412,8 @@ class UserDataProvider with ChangeNotifier {
   }
 
   Future<void> createAndUpdateChats() async {
-    final currentUserId = FirebaseAuth.instance.currentUser!.uid;
     _chats.clear();
-    for (final message in messages) {
+    for (final message in _messages) {
       final chatIndex = _chats.indexWhere((chat) =>
           (chat.receiver.id == message.receiverId ||
               chat.receiver.id == message.senderId));
@@ -424,12 +429,12 @@ class UserDataProvider with ChangeNotifier {
 
       if (chatIndex == -1) {
         final chatReceiver = fetchUnknownUserFromFriendsListById(
-              message.senderId == currentUserId
+              message.senderId == _user.id
                   ? message.receiverId
                   : message.senderId,
             ) ??
             await fetchUnknownUserInfoById(
-              message.senderId == currentUserId
+              message.senderId == _user.id
                   ? message.receiverId
                   : message.senderId,
             );
@@ -444,8 +449,8 @@ class UserDataProvider with ChangeNotifier {
   }
 
   Future<StreamSubscription> listenAndFetchLiveChatUsersFromDatabase() async {
-    final databaseRef = FirebaseDatabase.instance.ref('liveChatUsers');
-    return databaseRef.onValue.listen(
+    final lobbyRef = FirebaseDatabase.instance.ref('liveChatUsers');
+    return lobbyRef.onValue.listen(
       (event) {
         if (event.snapshot.value != null) {
           final eventSnapshotData =
@@ -480,7 +485,7 @@ class UserDataProvider with ChangeNotifier {
         }
       },
       onError: (error) =>
-          debugPrint(' Live Chat Users Stream Error Encountered!'),
+          debugPrint(' Live Chat Lobby Stream Error Encountered!'),
       cancelOnError: true,
     );
   }
@@ -489,20 +494,23 @@ class UserDataProvider with ChangeNotifier {
     final databaseRef = FirebaseDatabase.instance.ref('liveChatUsers');
     if (remove) {
       await databaseRef.update({_user.id: null});
-      return;
-    }
-    await databaseRef.onDisconnect().update({_user.id: null});
-    await databaseRef.update({
-      _user.id: {
-        'name': _user.name,
-        'emailAddress': _user.emailAddress,
-        'phoneNumber': _user.phoneNumber,
-        'dateOfBirth': _user.dateOfBirth.toIso8601String(),
-        'profilePictureURL': _user.profilePictureURL,
-        'interests': _user.interests,
-        'isPro': _user.isPro,
+      if (_liveChatUser.id != 'NO_ID') {
+        _liveChatUser = _liveChatUser.copyWith(id: 'NO_ID');
       }
-    });
+    } else {
+      await databaseRef.onDisconnect().update({_user.id: null});
+      await databaseRef.update({
+        _user.id: {
+          'name': _user.name,
+          'emailAddress': _user.emailAddress,
+          'phoneNumber': _user.phoneNumber,
+          'dateOfBirth': _user.dateOfBirth.toIso8601String(),
+          'profilePictureURL': _user.profilePictureURL,
+          'interests': _user.interests,
+          'isPro': _user.isPro,
+        }
+      });
+    }
   }
 
   Future<void> sendLiveMessage(Message message) async {

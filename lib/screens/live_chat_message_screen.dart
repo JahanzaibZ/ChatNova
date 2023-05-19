@@ -57,7 +57,11 @@ class _LiveChatMessageScreenState extends State<LiveChatMessageScreen> {
         routeArgs['liveChatMessageSubscription'] as StreamSubscription<dynamic>;
     return WillPopScope(
       onWillPop: liveChatUser.id == 'NO_ID'
-          ? null
+          ? () async {
+              userDataProvider.setUserLiveChatStatus(true);
+              userDataProvider.deleteLiveMessages();
+              return true;
+            }
           : () async {
               final bool? pop = await showDialog(
                 context: context,

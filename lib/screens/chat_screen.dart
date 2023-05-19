@@ -91,6 +91,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         title: Text(filteredChats[index].receiver.name),
                         subtitle: Text(
                           filteredChats[index].lastMessageText,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                               color: Theme.of(context)
                                   .textTheme
