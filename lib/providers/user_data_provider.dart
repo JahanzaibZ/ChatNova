@@ -103,23 +103,36 @@ class UserDataProvider with ChangeNotifier {
 
   Future<StreamSubscription> listenAndReadUserStatusFromDatabase() async {
     final databaseRef = FirebaseDatabase.instance.ref('userStatus');
+    var listChanged = false;
     return databaseRef.onValue.listen((event) {
-      final eventSnapshotData = event.snapshot.value as Map<dynamic, dynamic>;
-      _friendsStatus.clear();
-      eventSnapshotData.forEach((key, value) {
-        for (final friend in _userFriends) {
-          if (friend.id == key) {
-            _friendsStatus.addAll({key: value});
+      if (event.snapshot.value != null) {
+        final eventSnapshotData = event.snapshot.value as Map<dynamic, dynamic>;
+        _friendsStatus.clear();
+        eventSnapshotData.forEach((key, value) {
+          for (final friend in _userFriends) {
+            if (friend.id == key) {
+              if (!listChanged) {
+                listChanged = true;
+              }
+              _friendsStatus.addAll({key: value});
+            }
           }
-        }
-      });
+          if (listChanged) {
+            notifyListeners();
+          }
+        });
+      }
     });
   }
 
-  Future<void> setUserStatus() async {
+  Future<void> setUserStatus([bool setOffline = false]) async {
     final databaseRef = FirebaseDatabase.instance.ref('userStatus');
-    await databaseRef.onDisconnect().update({_user.id: null});
-    await databaseRef.update({_user.id: true});
+    if (!setOffline) {
+      await databaseRef.onDisconnect().update({_user.id: null});
+      await databaseRef.update({_user.id: true});
+    } else {
+      await databaseRef.update({_user.id: null});
+    }
   }
 
   Future<void> addOrRemoveUserFriendsAndBlocks({

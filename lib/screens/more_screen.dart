@@ -16,13 +16,17 @@ class MoreScreen extends StatelessWidget {
     return ListView(
       children: [
         ListTile(
-          leading: CircleAvatar(
-            backgroundImage:
-                const AssetImage('assets/images/default_profile.png'),
-            foregroundImage: user.profilePictureURL != null
-                ? NetworkImage(user.profilePictureURL!)
-                : null,
-            radius: 30,
+          leading: ClipOval(
+            child: user.profilePictureURL != null
+                ? FadeInImage(
+                    fadeInDuration: const Duration(milliseconds: 300),
+                    placeholder:
+                        const AssetImage('assets/images/default_profile.png'),
+                    image: NetworkImage(user.profilePictureURL!),
+                    imageErrorBuilder: (context, error, stackTrace) =>
+                        Image.asset('assets/images/default_profile.png'),
+                  )
+                : Image.asset('assets/images/default_profile.png'),
           ),
           title: Text(user.name),
           subtitle: Text(

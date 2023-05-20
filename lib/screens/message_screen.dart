@@ -22,6 +22,19 @@ class MessageScreen extends StatefulWidget {
 class _MessageScreenState extends State<MessageScreen> {
   final _messagesToBeDeleted = <Message>[];
 
+  bool _isUserOnline(String receiverId) {
+    var isOnline = false;
+    final friendsStatus = Provider.of<UserDataProvider>(context).friendsStatus;
+    friendsStatus.forEach(
+      (key, value) {
+        if (receiverId == key) {
+          isOnline = true;
+        }
+      },
+    );
+    return isOnline;
+  }
+
   dynamic _queryMessagesToBeDeleted(
       {required bool checkIfEmpty, bool? removeMessage, Message? message}) {
     if (checkIfEmpty) {
@@ -79,33 +92,77 @@ class _MessageScreenState extends State<MessageScreen> {
       child: Scaffold(
         appBar: AppBar(
           toolbarHeight: kToolbarHeight * 1.25,
-          title: InkWell(
-            splashColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            onTap: () => Navigator.of(context).pushNamed(
-              ProfileScreen.routeName,
-              arguments: receiver,
+          title: Theme(
+            data: Theme.of(context).copyWith(
+              highlightColor: Colors.transparent,
+              splashFactory: NoSplash.splashFactory,
             ),
-            child: Row(
-              children: [
-                Hero(
-                  tag: receiver.id,
-                  child: CircleAvatar(
-                    backgroundImage:
-                        const AssetImage('assets/images/default_profile.png'),
-                    foregroundImage: receiver.profilePictureURL != null
-                        ? NetworkImage(receiver.profilePictureURL!)
-                        : null,
-                    radius: 25,
-                  ),
+            child: ListTile(
+              leading: Hero(
+                tag: receiver.id,
+                child: ClipOval(
+                  child: receiver.profilePictureURL != null
+                      ? FadeInImage(
+                          fadeInDuration: const Duration(milliseconds: 300),
+                          placeholder: const AssetImage(
+                              'assets/images/default_profile.png'),
+                          image: NetworkImage(receiver.profilePictureURL!),
+                          imageErrorBuilder: (context, error, stackTrace) =>
+                              Image.asset('assets/images/default_profile.png'),
+                        )
+                      : Image.asset('assets/images/default_profile.png'),
                 ),
-                const SizedBox(
-                  width: 20,
-                ),
-                Text(receiver.name),
-              ],
+              ),
+              title: Text(receiver.name),
+              subtitle: _isUserOnline(receiver.id)
+                  ? Text(
+                      'Online',
+                      style: TextStyle(
+                        color: Theme.of(context)
+                            .textTheme
+                            .bodySmall!
+                            .color!
+                            .withOpacity(.5),
+                      ),
+                    )
+                  : null,
+              onTap: () => Navigator.of(context).pushNamed(
+                ProfileScreen.routeName,
+                arguments: receiver,
+              ),
             ),
           ),
+
+          //   Row(
+          //     children: [
+          //       SizedBox(
+          //         width: mediaQuery.size.width * .2,
+          //         child: Hero(
+          //           tag: receiver.id,
+          //           child: ClipRRect(
+          //             borderRadius: BorderRadius.circular(20),
+          //             child: FadeInImage(
+          //               placeholder: const AssetImage(
+          //                   'assets/images/default_profile_square.png'),
+          //               image: (receiver.profilePictureURL == null
+          //                       ? const AssetImage(
+          //                           'assets/images/default_profile_square.png')
+          //                       : NetworkImage(receiver.profilePictureURL!))
+          //                   as ImageProvider<Object>,
+          //               imageErrorBuilder: (context, error, stackTrace) =>
+          //                   Image.asset(
+          //                       'assets/images/default_profile_square.png'),
+          //             ),
+          //           ),
+          //         ),
+          //       ),
+          //       const SizedBox(
+          //         width: 20,
+          //       ),
+          //       Text(receiver.name),
+          //     ],
+          //   ),
+          // ),
           actions: [
             if (_messagesToBeDeleted.isNotEmpty)
               IconButton(

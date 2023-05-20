@@ -20,9 +20,9 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  var currentIndex = 1;
-  late StreamSubscription messageStreamSubscription;
-  late StreamSubscription statusStreamSubscription;
+  var _currentIndex = 1;
+  late StreamSubscription _messageStreamSubscription;
+  late StreamSubscription _statusStreamSubscription;
 
   @override
   void initState() {
@@ -32,8 +32,8 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void dispose() {
-    messageStreamSubscription.cancel();
-    statusStreamSubscription.cancel();
+    _messageStreamSubscription.cancel();
+    _statusStreamSubscription.cancel();
     super.dispose();
   }
 
@@ -41,18 +41,18 @@ class _MainScreenState extends State<MainScreen> {
     final userDataProvider =
         Provider.of<UserDataProvider>(context, listen: false);
     await userDataProvider.setUserStatus();
-    messageStreamSubscription =
+    _messageStreamSubscription =
         await userDataProvider.listenAndReadMessasgesFromFirestore();
-    statusStreamSubscription =
+    _statusStreamSubscription =
         await userDataProvider.listenAndReadUserStatusFromDatabase();
   }
 
   PreferredSizeWidget _scaffoldAppBar() {
     var title = 'Chat';
     var actions = <Widget>[];
-    if (currentIndex == 0) {
+    if (_currentIndex == 0) {
       title = 'Live Chat';
-    } else if (currentIndex == 1) {
+    } else if (_currentIndex == 1) {
       title = 'Chats';
       actions = [
         IconButton(
@@ -60,13 +60,15 @@ class _MainScreenState extends State<MainScreen> {
                 Navigator.pushNamed(context, NewChatScreen.routeName),
             icon: const Icon(Icons.add))
       ];
-    } else if (currentIndex == 2) {
+    } else if (_currentIndex == 2) {
       title = 'More';
       actions = [
         IconButton(
           onPressed: () {
-            Provider.of<UserDataProvider>(context, listen: false)
-                .clearAllLists();
+            var userDataProvider =
+                Provider.of<UserDataProvider>(context, listen: false);
+            userDataProvider.setUserStatus(true);
+            userDataProvider.clearAllLists();
             FirebaseAuth.instance.signOut();
           },
           icon: const Icon(Icons.logout_outlined),
@@ -84,7 +86,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget _scaffoldBody() {
-    switch (currentIndex) {
+    switch (_currentIndex) {
       case 0:
         return const LiveChatScreen();
       case 1:
@@ -108,12 +110,12 @@ class _MainScreenState extends State<MainScreen> {
           highlightColor: Colors.transparent,
         ),
         child: BottomNavigationBar(
-            currentIndex: currentIndex,
+            currentIndex: _currentIndex,
             showUnselectedLabels: false,
             backgroundColor: Colors.transparent,
             elevation: 0,
             onTap: (value) => setState(() {
-                  currentIndex = value;
+                  _currentIndex = value;
                 }),
             items: const [
               BottomNavigationBarItem(

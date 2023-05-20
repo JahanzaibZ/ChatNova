@@ -76,18 +76,38 @@ class _ChatScreenState extends State<ChatScreen> {
                   itemCount: filteredChats.length,
                   itemBuilder: (context, index) {
                     return ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: const AssetImage(
-                              'assets/images/default_profile.png'),
-                          foregroundImage:
+                        leading: ClipOval(
+                          child:
                               filteredChats[index].receiver.profilePictureURL !=
                                       null
-                                  ? NetworkImage(filteredChats[index]
-                                      .receiver
-                                      .profilePictureURL!)
-                                  : null,
-                          radius: 30,
+                                  ? FadeInImage(
+                                      fadeInDuration:
+                                          const Duration(milliseconds: 300),
+                                      placeholder: const AssetImage(
+                                          'assets/images/default_profile.png'),
+                                      image: NetworkImage(filteredChats[index]
+                                          .receiver
+                                          .profilePictureURL!),
+                                      imageErrorBuilder: (context, error,
+                                              stackTrace) =>
+                                          Image.asset(
+                                              'assets/images/default_profile.png'),
+                                    )
+                                  : Image.asset(
+                                      'assets/images/default_profile.png'),
                         ),
+                        // CircleAvatar(
+                        //   backgroundImage: const AssetImage(
+                        //       'assets/images/default_profile.png'),
+                        //   foregroundImage:
+                        //       filteredChats[index].receiver.profilePictureURL !=
+                        //               null
+                        //           ? NetworkImage(filteredChats[index]
+                        //               .receiver
+                        //               .profilePictureURL!)
+                        //           : null,
+                        //   radius: 30,
+                        // ),
                         title: Text(filteredChats[index].receiver.name),
                         subtitle: Text(
                           filteredChats[index].lastMessageText,

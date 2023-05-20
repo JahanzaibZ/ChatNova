@@ -32,16 +32,23 @@ class ProfileScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Hero(
-                  transitionOnUserGestures: true,
-                  tag: receiver.id,
-                  child: CircleAvatar(
-                    radius: mediaQuery.devicePixelRatio * 40,
-                    foregroundImage: receiver.profilePictureURL == null
-                        ? null
-                        : NetworkImage(receiver.profilePictureURL!),
-                    backgroundImage: const AssetImage(
-                      'assets/images/default_profile.png',
+                SizedBox(
+                  height: scaffoldBodyHeight * .2,
+                  child: Hero(
+                    transitionOnUserGestures: true,
+                    tag: receiver.id,
+                    child: ClipOval(
+                      child: receiver.profilePictureURL != null
+                          ? FadeInImage(
+                              fadeInDuration: const Duration(milliseconds: 300),
+                              placeholder: const AssetImage(
+                                  'assets/images/default_profile.png'),
+                              image: NetworkImage(receiver.profilePictureURL!),
+                              imageErrorBuilder: (context, error, stackTrace) =>
+                                  Image.asset(
+                                      'assets/images/default_profile.png'),
+                            )
+                          : Image.asset('assets/images/default_profile.png'),
                     ),
                   ),
                 ),

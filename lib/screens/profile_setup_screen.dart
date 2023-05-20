@@ -231,13 +231,32 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircleAvatar(
-                      radius: mediaQuery.devicePixelRatio * 40,
-                      foregroundImage: _showProfileImage(),
-                      backgroundImage: const AssetImage(
-                        'assets/images/default_profile.png',
+                    SizedBox(
+                      height: scaffoldBodyHeight * .2,
+                      child: ClipOval(
+                        child: _showProfileImage() != null
+                            ? FadeInImage(
+                                fadeInDuration:
+                                    const Duration(milliseconds: 300),
+                                placeholder: const AssetImage(
+                                    'assets/images/default_profile.png'),
+                                image: _showProfileImage() ??
+                                    const AssetImage(
+                                        'assets/images/default_profile.png'),
+                                imageErrorBuilder:
+                                    (context, error, stackTrace) => Image.asset(
+                                        'assets/images/default_profile.png'),
+                              )
+                            : Image.asset('assets/images/default_profile.png'),
                       ),
                     ),
+                    // CircleAvatar(
+                    //   radius: mediaQuery.devicePixelRatio * 40,
+                    //   foregroundImage: _showProfileImage(),
+                    //   backgroundImage: const AssetImage(
+                    //     'assets/images/default_profile.png',
+                    //   ),
+                    // ),
                     TextButton(
                       onPressed: _pickImage,
                       child: Text(_pickedImage != null
