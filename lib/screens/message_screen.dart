@@ -193,40 +193,59 @@ class _MessageScreenState extends State<MessageScreen> {
                 Expanded(
                   child: messages.isEmpty
                       ? const SizedBox()
-                      : ListView.builder(
-                          reverse: true,
-                          itemCount: messages.length,
-                          itemBuilder: (context, index) {
-                            final today = DateTime.now();
-                            var dayDifference = daysBetweenDates(
-                              messages[index].timeStamp.year,
-                              messages[index].timeStamp.month,
-                              messages[index].timeStamp.day,
-                              today.year,
-                              today.month,
-                              today.day,
-                            );
-                            if ((index + 1) < messages.length) {
-                              final messageDateDiffrence = daysBetweenDates(
-                                messages[index].timeStamp.year,
-                                messages[index].timeStamp.month,
-                                messages[index].timeStamp.day,
-                                messages[index + 1].timeStamp.year,
-                                messages[index + 1].timeStamp.month,
-                                messages[index + 1].timeStamp.day,
-                              );
-                              if (messageDateDiffrence == 0) {
-                                dayDifference = -1;
-                              }
-                            }
-                            return MessageSelection(
-                              key: ValueKey(messages[index].id),
-                              messagesToBeDelete: _queryMessagesToBeDeleted,
-                              message: messages[index],
-                              activeUserId: currentUserId,
-                              dayDifference: dayDifference,
-                            );
+                      : ShaderMask(
+                          shaderCallback: (bounds) {
+                            return LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                stops: const [
+                                  .9,
+                                  1,
+                                ],
+                                colors: [
+                                  Theme.of(context).scaffoldBackgroundColor,
+                                  Colors.transparent,
+                                ]).createShader(bounds);
                           },
+                          blendMode: BlendMode.dstIn,
+                          child: SizedBox(
+                            width: mediaQuery.size.width,
+                            child: ListView.builder(
+                              reverse: true,
+                              itemCount: messages.length,
+                              itemBuilder: (context, index) {
+                                final today = DateTime.now();
+                                var dayDifference = daysBetweenDates(
+                                  messages[index].timeStamp.year,
+                                  messages[index].timeStamp.month,
+                                  messages[index].timeStamp.day,
+                                  today.year,
+                                  today.month,
+                                  today.day,
+                                );
+                                if ((index + 1) < messages.length) {
+                                  final messageDateDiffrence = daysBetweenDates(
+                                    messages[index].timeStamp.year,
+                                    messages[index].timeStamp.month,
+                                    messages[index].timeStamp.day,
+                                    messages[index + 1].timeStamp.year,
+                                    messages[index + 1].timeStamp.month,
+                                    messages[index + 1].timeStamp.day,
+                                  );
+                                  if (messageDateDiffrence == 0) {
+                                    dayDifference = -1;
+                                  }
+                                }
+                                return MessageSelection(
+                                  key: ValueKey(messages[index].id),
+                                  messagesToBeDelete: _queryMessagesToBeDeleted,
+                                  message: messages[index],
+                                  activeUserId: currentUserId,
+                                  dayDifference: dayDifference,
+                                );
+                              },
+                            ),
+                          ),
                         ),
                 ),
                 MessageTextfield(

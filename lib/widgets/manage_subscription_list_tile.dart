@@ -13,11 +13,12 @@ class ManageSubscriptionListTile extends StatelessWidget {
         Provider.of<UserDataProvider>(context, listen: false);
     final user = Provider.of<UserDataProvider>(context).user;
     return ListTile(
-      leading: const Icon(
-        Icons.add_card_rounded,
-        // size: 30,
+      leading: Icon(
+        user.isPro
+            ? Icons.arrow_circle_down_rounded
+            : Icons.arrow_circle_up_rounded,
       ),
-      title: Text(user.isPro ? 'Manage Pro Account' : 'Upgrade to Pro Account'),
+      title: Text(user.isPro ? 'Downgrade Account' : 'Upgrade Account'),
       trailing: const Icon(Icons.keyboard_arrow_right),
       onTap: () {
         user.isPro

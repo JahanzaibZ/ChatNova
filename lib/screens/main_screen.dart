@@ -48,7 +48,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   PreferredSizeWidget _scaffoldAppBar() {
-    var title = 'Chat';
+    var title = 'Chats';
     var actions = <Widget>[];
     if (_currentIndex == 0) {
       title = 'Live Chat';

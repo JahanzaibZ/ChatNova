@@ -325,8 +325,16 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                             labelText: 'Interests/Hobbies',
                             hintText: 'e.g. Travel, Video Games'),
                         validator: (value) {
-                          if (value == null || value.isEmpty) {
+                          if (value == null || value.trim().isEmpty) {
                             return 'Please enter at least one interest/hobby!';
+                          } else if ((value
+                                      .split(',')
+                                      .map((string) => string.trim())
+                                      .toList()
+                                    ..removeWhere((string) => string.isEmpty))
+                                  .length >
+                              3) {
+                            return 'Please enter at most three interest/hobby!';
                           }
                           return null;
                         },
@@ -335,7 +343,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                             interests: interests!
                                 .split(',')
                                 .map((string) => string.trim())
-                                .toList(),
+                                .toList()
+                              ..removeWhere((string) => string.isEmpty),
                           );
                         },
                       ),
