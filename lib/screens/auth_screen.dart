@@ -31,25 +31,74 @@ class _AuthScreenState extends State<AuthScreen> {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       var isValid = _formKey.currentState!.validate();
+      var continueAnyway = false;
       if (isValid) {
         _formKey.currentState!.save();
         FocusScope.of(context).unfocus();
         setState(() {
           _isLoading = true;
         });
-        showCustomDialog(context,
-            content: 'Loading...', showActionButton: false);
         if (_authType == AuthType.continueWithPhoneNumber) {
-          await authProvider.sendOTP();
-          setState(() {
-            _isLoading = false;
-          });
-          if (mounted) {
-            Navigator.of(context).popAndPushNamed(
-              OtpScreen.routeName,
-            );
+          await showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: const Text(
+                    'Important Note!',
+                    textAlign: TextAlign.center,
+                  ),
+                  content: const Text(
+                    'Apologies for the inconvenience, but since our app has not been published on Google Play, you may be redirected to a web browser for reCaptcha verification. This is a requirement imposed by Google. Thank you for your understanding.',
+                    textAlign: TextAlign.justify,
+                    textScaleFactor: .95,
+                  ),
+                  actionsPadding: const EdgeInsets.only(bottom: 20),
+                  actionsAlignment: MainAxisAlignment.spaceAround,
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Cancel'),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size(
+                            MediaQuery.of(context).size.width * .25,
+                            MediaQuery.of(context).size.height * .06),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      onPressed: () {
+                        continueAnyway = true;
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Continue'),
+                    ),
+                  ],
+                );
+              });
+          if (continueAnyway && mounted) {
+            showCustomDialog(context,
+                content: 'Loading...', showActionButton: false);
+            await authProvider.sendOTP();
+            setState(() {
+              _isLoading = false;
+            });
+            if (mounted) {
+              Navigator.of(context).popAndPushNamed(
+                OtpScreen.routeName,
+              );
+            }
+          } else {
+            setState(() {
+              _isLoading = false;
+            });
           }
         } else {
+          showCustomDialog(context,
+              content: 'Loading...', showActionButton: false);
           await authProvider.authenticateWithEmailAndPassword(_authType);
           if (mounted) {
             Navigator.of(context).popUntil((route) => route.isFirst);
