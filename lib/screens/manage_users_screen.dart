@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_contacts/flutter_contacts.dart';
+// import 'package:flutter_contacts/flutter_contacts.dart';
 
 import '../models/app_user.dart';
 import '../providers/user_data_provider.dart';
 import '../screens/profile_screen.dart';
 import '../widgets/user_search_dialog.dart';
-import '../widgets/custom_dialog.dart';
+// import '../widgets/custom_dialog.dart';
 
 class ManageUsersScreen extends StatefulWidget {
   static const routeName = '/manage-users-screen';
@@ -75,55 +75,56 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
               ],
             ),
             _dialogMenuItem(
-              title: 'Import From Contacts',
-              onPressed: () async {
-                final userDataProvider =
-                    Provider.of<UserDataProvider>(context, listen: false);
-                Navigator.of(_scaffoldKey.currentContext ?? context).pop();
-                showCustomDialog(_scaffoldKey.currentContext ?? context,
-                    content: 'Importing...', showActionButton: false);
-                final permission = await FlutterContacts.requestPermission();
-                if (permission) {
-                  List<Contact> contacts =
-                      await FlutterContacts.getContacts(withProperties: true);
-                  for (final contact in contacts) {
-                    for (final phone in contact.phones) {
-                      final user = await userDataProvider
-                          .fetchUnknownUserInfoByPhone(phone.number);
-                      debugPrint('User: $user');
-                      if (user != null) {
-                        if (userDataProvider.userFriends
-                            .every((friend) => !(friend.id == user.id))) {
-                          await userDataProvider
-                              .addOrRemoveUserFriendsAndBlocks(
-                            user: user,
-                            delayed: false,
-                          );
-                        }
-                      }
-                    }
-                  }
-                  if (mounted) {
-                    Navigator.of(_scaffoldKey.currentContext ?? context).pop();
-                  }
-                  showCustomDialog(
-                    _scaffoldKey.currentContext ?? context,
-                    title: 'Import Successful!',
-                    content:
-                        'Users (if any) from your contacts were successfully imported to your friends list.',
-                    showActionButton: true,
-                  );
-                } else if (mounted) {
-                  Navigator.of(_scaffoldKey.currentContext ?? context).pop();
-                  showCustomDialog(_scaffoldKey.currentContext ?? context,
-                      title: 'Import Failed!',
-                      content:
-                          'Please allow permissions to the contacts in the device settings and try again!',
-                      showActionButton: true);
-                } else {
-                  return;
-                }
-              },
+              title: 'Import From Contacts\n(Unavailable)',
+              onPressed: null,
+              // () async {
+              //   final userDataProvider =
+              //       Provider.of<UserDataProvider>(context, listen: false);
+              //   Navigator.of(_scaffoldKey.currentContext ?? context).pop();
+              //   showCustomDialog(_scaffoldKey.currentContext ?? context,
+              //       content: 'Importing...', showActionButton: false);
+              //   final permission = await FlutterContacts.requestPermission();
+              //   if (permission) {
+              //     List<Contact> contacts =
+              //         await FlutterContacts.getContacts(withProperties: true);
+              //     for (final contact in contacts) {
+              //       for (final phone in contact.phones) {
+              //         final user = await userDataProvider
+              //             .fetchUnknownUserInfoByPhone(phone.number);
+              //         debugPrint('User: $user');
+              //         if (user != null) {
+              //           if (userDataProvider.userFriends
+              //               .every((friend) => !(friend.id == user.id))) {
+              //             await userDataProvider
+              //                 .addOrRemoveUserFriendsAndBlocks(
+              //               user: user,
+              //               delayed: false,
+              //             );
+              //           }
+              //         }
+              //       }
+              //     }
+              //     if (mounted) {
+              //       Navigator.of(_scaffoldKey.currentContext ?? context).pop();
+              //     }
+              //     showCustomDialog(
+              //       _scaffoldKey.currentContext ?? context,
+              //       title: 'Import Successful!',
+              //       content:
+              //           'Users (if any) from your contacts were successfully imported to your friends list.',
+              //       showActionButton: true,
+              //     );
+              //   } else if (mounted) {
+              //     Navigator.of(_scaffoldKey.currentContext ?? context).pop();
+              //     showCustomDialog(_scaffoldKey.currentContext ?? context,
+              //         title: 'Import Failed!',
+              //         content:
+              //             'Please allow permissions to the contacts in the device settings and try again!',
+              //         showActionButton: true);
+              //   } else {
+              //     return;
+              //   }
+              // },
             ),
           ],
         );
@@ -133,7 +134,7 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
 
   Widget _dialogMenuItem({
     required String title,
-    required VoidCallback onPressed,
+    required VoidCallback? onPressed,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
@@ -144,7 +145,25 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
         child: SizedBox(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [Text(title)],
+            children: [
+              Builder(
+                builder: (ctx) {
+                  return Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: onPressed != null
+                        ? null
+                        : TextStyle(
+                            color: Theme.of(ctx)
+                                .textTheme
+                                .displayMedium!
+                                .color!
+                                .withAlpha(125),
+                          ),
+                  );
+                },
+              )
+            ],
           ),
         ),
       ),

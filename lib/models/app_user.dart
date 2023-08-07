@@ -16,7 +16,7 @@ class AppUser {
     this.profilePictureURL,
     required this.dateOfBirth,
     required this.interests,
-    this.isPro = false,
+    this.isPro = true,
   });
 
   AppUser copyWith(

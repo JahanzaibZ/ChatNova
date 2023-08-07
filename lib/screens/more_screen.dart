@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../screens/profile_setup_screen.dart';
 import '../screens/manage_users_screen.dart';
 import '../providers/user_data_provider.dart';
-import '../widgets/manage_subscription_list_tile.dart';
 
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
@@ -21,7 +20,7 @@ class MoreScreen extends StatelessWidget {
     return Column(
       children: [
         SizedBox(
-          height: scaffoldBodyHeight * .4,
+          height: scaffoldBodyHeight * .45,
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
             InkWell(
               onTap: () => Navigator.of(context).pushNamed(
@@ -62,18 +61,18 @@ class MoreScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(10),
               child: IconButton(
-                  onPressed: () => Navigator.of(context).pushNamed(
-                        ProfileSetupScreen.routeName,
-                        arguments: true,
-                      ),
-                  icon: const Icon(Icons.mode_edit_rounded)),
+                onPressed: () => Navigator.of(context).pushNamed(
+                  ProfileSetupScreen.routeName,
+                  arguments: true,
+                ),
+                icon: const Icon(Icons.mode_edit_rounded),
+              ),
             ),
           ]),
         ),
         Expanded(
           child: ListView(
             children: [
-              const ManageSubscriptionListTile(),
               ListTile(
                 leading: const Icon(
                   Icons.group_rounded,
